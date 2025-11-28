@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/ai")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -37,8 +39,27 @@ public class AIController {
             Long userId = jwtUtil.getUserIdFromToken(token.substring(7));
             User user = userService.getUserEntityById(userId);
 
-            // AI 응답 생성
-            String response = aiService.answerQuestion(request.getQuestion(), "");
+            // 최근 대화 기록 가져오기 (문맥 유지)
+            List<AIConversation> recentConversations = conversationRepository
+                    .findByUserIdOrderByCreatedAtDesc(userId)
+                    .stream()
+                    .limit(5) // 최근 5개 대화만
+                    .toList();
+
+            // 대화 문맥 구성
+            StringBuilder context = new StringBuilder();
+            for (int i = recentConversations.size() - 1; i >= 0; i--) {
+                AIConversation conv = recentConversations.get(i);
+                context.append("사용자: ").append(conv.getUserQuestion()).append("\n");
+                context.append("AI: ").append(conv.getAiResponse()).append("\n\n");
+            }
+
+            // AI 응답 생성 (문맥 포함)
+            String response = aiService.answerQuestionWithContext(
+                    request.getQuestion(), 
+                    context.toString(),
+                    recentConversations.size()
+            );
 
             // 대화 기록 저장
             AIConversation conversation = AIConversation.builder()

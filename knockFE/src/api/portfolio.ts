@@ -12,6 +12,14 @@ export interface PortfolioDto {
   profitLossRate: number;
 }
 
+export interface PortfolioAnalysisDto {
+  totalValue: number;
+  totalProfitLoss: number;
+  totalProfitLossRate: number;
+  analysis: string;
+  investmentStyle: string;
+}
+
 export const portfolioAPI = {
   getAll: async (): Promise<PortfolioDto[]> => {
     const response = await apiClient.get<PortfolioDto[]>('/portfolio');
@@ -34,6 +42,11 @@ export const portfolioAPI = {
 
   delete: async (portfolioId: number): Promise<void> => {
     await apiClient.delete(`/portfolio/${portfolioId}`);
+  },
+
+  getAnalysis: async (): Promise<PortfolioAnalysisDto> => {
+    const response = await apiClient.get<PortfolioAnalysisDto>('/portfolio/analysis');
+    return response.data;
   },
 };
 

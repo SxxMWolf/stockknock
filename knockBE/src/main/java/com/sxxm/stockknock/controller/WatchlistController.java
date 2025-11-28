@@ -3,7 +3,6 @@ package com.sxxm.stockknock.controller;
 import com.sxxm.stockknock.dto.StockDto;
 import com.sxxm.stockknock.entity.Watchlist;
 import com.sxxm.stockknock.repository.WatchlistRepository;
-import com.sxxm.stockknock.repository.StockRepository;
 import com.sxxm.stockknock.service.UserService;
 import com.sxxm.stockknock.service.StockService;
 import com.sxxm.stockknock.util.JwtUtil;
@@ -21,9 +20,6 @@ public class WatchlistController {
 
     @Autowired
     private WatchlistRepository watchlistRepository;
-
-    @Autowired
-    private StockRepository stockRepository;
 
     @Autowired
     private UserService userService;
