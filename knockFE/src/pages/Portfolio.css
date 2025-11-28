@@ -1,0 +1,52 @@
+.portfolio {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.portfolio h1 {
+  margin-bottom: 2rem;
+}
+
+.portfolio-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.portfolio-item {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-info h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.stock-info p {
+  margin: 0;
+  color: #666;
+}
+
+.portfolio-details {
+  text-align: right;
+}
+
+.portfolio-details p {
+  margin: 0.25rem 0;
+}
+
+.portfolio-details .positive {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.portfolio-details .negative {
+  color: #ef4444;
+  font-weight: bold;
+}
+
