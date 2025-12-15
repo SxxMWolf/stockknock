@@ -3,16 +3,18 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FFD8E8 0%, #FF94B2 50%, #F24455 100%);
 }
 
 .login-box {
   background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(242, 68, 85, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
+  margin: 0 auto;
+  backdrop-filter: blur(10px);
 }
 
 .login-box h2 {
@@ -38,27 +40,34 @@
   border-radius: 5px;
   font-size: 1rem;
   box-sizing: border-box;
+  background: white;
+  color: #333;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #F24455;
+  box-shadow: 0 0 0 3px rgba(242, 68, 85, 0.1);
 }
 
 button {
   width: 100%;
   padding: 0.75rem;
-  background: #667eea;
+  background: linear-gradient(135deg, #FF94B2 0%, #F24455 100%);
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(242, 68, 85, 0.3);
 }
 
 button:hover {
-  background: #5568d3;
+  background: linear-gradient(135deg, #F24455 0%, #E5203A 100%);
+  box-shadow: 0 6px 20px rgba(242, 68, 85, 0.4);
+  transform: translateY(-2px);
 }
 
 .error {
@@ -70,8 +79,9 @@ button:hover {
 .login-box p {
   text-align: center;
   margin-top: 1rem;
-  color: #667eea;
+  color: #F24455;
   cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .login-box p:hover {

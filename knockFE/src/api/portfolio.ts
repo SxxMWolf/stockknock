@@ -1,11 +1,14 @@
 import { apiClient } from './client';
-import { StockDto } from './stock';
+import type { StockDto } from './stock';
 
+// PortfolioDto interface
 export interface PortfolioDto {
   id: number;
+  portfolioId: number;
+  portfolioName: string;
   stock: StockDto;
   quantity: number;
-  averagePrice: number;
+  avgBuyPrice: number;
   currentPrice: number;
   totalValue: number;
   profitLoss: number;
@@ -26,16 +29,16 @@ export const portfolioAPI = {
     return response.data;
   },
 
-  add: async (stockSymbol: string, quantity: number, averagePrice: number): Promise<PortfolioDto> => {
+  add: async (stockSymbol: string, quantity: number, avgBuyPrice: number): Promise<PortfolioDto> => {
     const response = await apiClient.post<PortfolioDto>('/portfolio', null, {
-      params: { stockSymbol, quantity, averagePrice },
+      params: { stockSymbol, quantity, avgBuyPrice },
     });
     return response.data;
   },
 
-  update: async (portfolioId: number, quantity?: number, averagePrice?: number): Promise<PortfolioDto> => {
+  update: async (portfolioId: number, quantity?: number, avgBuyPrice?: number): Promise<PortfolioDto> => {
     const response = await apiClient.put<PortfolioDto>(`/portfolio/${portfolioId}`, null, {
-      params: { quantity, averagePrice },
+      params: { quantity, avgBuyPrice },
     });
     return response.data;
   },

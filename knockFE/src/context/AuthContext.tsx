@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authAPI, AuthResponse } from '../api/auth';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { authAPI } from '../api/auth';
+import type { AuthResponse } from '../api/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: AuthResponse | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string, nickname: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -23,20 +25,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser({
         token,
         userId: parseInt(userId),
+        username: '',
         email: '',
         name: '',
       });
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const response = await authAPI.login({ email, password });
+  const login = async (username: string, password: string) => {
+    const response = await authAPI.login({ username, password });
     setUser(response);
     setIsAuthenticated(true);
   };
 
-  const register = async (email: string, password: string) => {
-    const response = await authAPI.register({ email, password });
+  const register = async (username: string, email: string, password: string, nickname: string) => {
+    const response = await authAPI.register({ username, email, password, nickname });
     setUser(response);
     setIsAuthenticated(true);
   };

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Portfolio from './pages/Portfolio';
 import News from './pages/News';
 import AIChat from './pages/AIChat';
+import EmailChange from './pages/EmailChange';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -49,6 +50,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <AIChat />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/email-change"
+        element={
+          <PrivateRoute>
+            <EmailChange />
           </PrivateRoute>
         }
       />

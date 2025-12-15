@@ -20,8 +20,8 @@ const Portfolio: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, quantity, averagePrice }: { id: number; quantity?: number; averagePrice?: number }) =>
-      portfolioAPI.update(id, quantity, averagePrice),
+    mutationFn: ({ id, quantity, avgBuyPrice }: { id: number; quantity?: number; avgBuyPrice?: number }) =>
+      portfolioAPI.update(id, quantity, avgBuyPrice),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portfolio'] });
       queryClient.invalidateQueries({ queryKey: ['portfolioAnalysis'] });
@@ -40,14 +40,14 @@ const Portfolio: React.FC = () => {
   const handleEdit = (item: any) => {
     setEditingId(item.id);
     setEditQuantity(item.quantity.toString());
-    setEditAveragePrice(item.averagePrice.toString());
+    setEditAveragePrice(item.avgBuyPrice.toString());
   };
 
   const handleSave = (id: number) => {
     updateMutation.mutate({
       id,
       quantity: parseFloat(editQuantity),
-      averagePrice: parseFloat(editAveragePrice),
+      avgBuyPrice: parseFloat(editAveragePrice),
     });
   };
 
@@ -107,7 +107,7 @@ const Portfolio: React.FC = () => {
             ) : (
               <div className="portfolio-details">
                 <p>보유량: {item.quantity}</p>
-                <p>평균가: {item.averagePrice.toLocaleString()}원</p>
+                <p>평균가: {item.avgBuyPrice.toLocaleString()}원</p>
                 <p>현재가: {item.currentPrice.toLocaleString()}원</p>
                 <p className={item.profitLoss >= 0 ? 'positive' : 'negative'}>
                   손익: {item.profitLoss >= 0 ? '+' : ''}{item.profitLoss.toLocaleString()}원

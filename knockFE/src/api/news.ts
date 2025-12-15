@@ -1,10 +1,10 @@
-import { apiClient } from './client';
+import { fastApiClient } from './fastApiClient';
 
 export interface NewsAnalysisDto {
   summary: string;
-  impactAnalysis: string;
   sentiment: string;
-  impactScore: number;
+  impact_score: number;
+  ai_comment: string;
 }
 
 export interface NewsDto {
@@ -13,24 +13,24 @@ export interface NewsDto {
   content: string;
   source: string;
   url: string;
-  publishedAt: string;
-  relatedStockSymbols: string[];
+  published_at: string;
+  related_stock_symbols?: string[];
   analysis?: NewsAnalysisDto;
 }
 
 export const newsAPI = {
   getRecent: async (days: number = 7): Promise<NewsDto[]> => {
-    const response = await apiClient.get<NewsDto[]>(`/news/recent?days=${days}`);
+    const response = await fastApiClient.get<NewsDto[]>(`/api/news/recent?days=${days}`);
     return response.data;
   },
 
   getById: async (newsId: number): Promise<NewsDto> => {
-    const response = await apiClient.get<NewsDto>(`/news/${newsId}`);
+    const response = await fastApiClient.get<NewsDto>(`/api/news/${newsId}`);
     return response.data;
   },
 
   analyze: async (newsId: number): Promise<NewsAnalysisDto> => {
-    const response = await apiClient.post<NewsAnalysisDto>(`/news/${newsId}/analyze`);
+    const response = await fastApiClient.post<NewsAnalysisDto>(`/api/news/analyze/${newsId}`);
     return response.data;
   },
 };

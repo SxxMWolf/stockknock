@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { aiAPI } from '../api/ai';
+import { useAuth } from '../context/AuthContext';
 import './AIChat.css';
 
 const AIChat: React.FC = () => {
+  const { user } = useAuth();
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'ai'; content: string }>>([]);
 
   const mutation = useMutation({
-    mutationFn: (q: string) => aiAPI.chat({ question: q }),
+    mutationFn: (q: string) => aiAPI.chat({ 
+      question: q,
+      user_id: user?.userId || 0,
+      conversationType: 'general'
+    }),
     onSuccess: (data) => {
       setMessages(prev => [
         ...prev,
@@ -19,7 +25,7 @@ const AIChat: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim()) return;
+    if (!question.trim() || !user?.userId) return;
 
     setMessages(prev => [...prev, { role: 'user', content: question }]);
     mutation.mutate(question);

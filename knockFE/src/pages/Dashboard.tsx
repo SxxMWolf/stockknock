@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
 
   const { data: portfolio } = useQuery({
@@ -26,11 +26,15 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>StockKnock</h1>
+        <div className="header-left">
+          <h1>StockKnock</h1>
+          {user?.name && <span className="user-greeting">안녕하세요, {user.name}님!</span>}
+        </div>
         <nav>
           <button onClick={() => navigate('/portfolio')}>포트폴리오</button>
           <button onClick={() => navigate('/news')}>뉴스</button>
           <button onClick={() => navigate('/ai-chat')}>AI 분석</button>
+          <button onClick={() => navigate('/email-change')}>이메일 변경</button>
           <button onClick={logout}>로그아웃</button>
         </nav>
       </header>
@@ -58,7 +62,7 @@ const Dashboard: React.FC = () => {
             {news?.slice(0, 5).map((item) => (
               <div key={item.id} className="news-item">
                 <h4>{item.title}</h4>
-                <p>{item.source} · {new Date(item.publishedAt).toLocaleDateString()}</p>
+                <p>{item.source} · {new Date(item.published_at || '').toLocaleDateString()}</p>
               </div>
             ))}
           </div>
