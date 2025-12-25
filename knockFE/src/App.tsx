@@ -5,21 +5,31 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Portfolio from './pages/Portfolio';
+import PortfolioValueAnalysis from './pages/PortfolioValueAnalysis';
+import PortfolioProfitAnalysis from './pages/PortfolioProfitAnalysis';
+import Watchlist from './pages/Watchlist';
+import Alerts from './pages/Alerts';
 import News from './pages/News';
+import NewsDetail from './pages/NewsDetail';
 import AIChat from './pages/AIChat';
-import EmailChange from './pages/EmailChange';
-import './App.css';
+import MyPage from './pages/MyPage';
 
 const queryClient = new QueryClient();
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  // 개발 편의를 위해 임시로 주석처리
+  // const { isAuthenticated } = useAuth();
+  // return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  return <>{children}</>;
 };
 
 function AppRoutes() {
+  // 개발 편의를 위해 임시로 주석처리
+  // const { isAuthenticated } = useAuth();
+  
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/dashboard"
@@ -38,10 +48,50 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/portfolio/analysis/value"
+        element={
+          <PrivateRoute>
+            <PortfolioValueAnalysis />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/portfolio/analysis/profit"
+        element={
+          <PrivateRoute>
+            <PortfolioProfitAnalysis />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/watchlist"
+        element={
+          <PrivateRoute>
+            <Watchlist />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/alerts"
+        element={
+          <PrivateRoute>
+            <Alerts />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/news"
         element={
           <PrivateRoute>
             <News />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/news/:id"
+        element={
+          <PrivateRoute>
+            <NewsDetail />
           </PrivateRoute>
         }
       />
@@ -54,14 +104,13 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/email-change"
+        path="/mypage"
         element={
           <PrivateRoute>
-            <EmailChange />
+            <MyPage />
           </PrivateRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 }

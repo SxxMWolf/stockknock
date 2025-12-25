@@ -139,7 +139,7 @@ public class AIService {
         return generateResponse(prompt);
     }
 
-    private String generateResponse(String prompt) {
+    public String generateResponse(String prompt) {
         try {
             OpenAiService service = getOpenAiService();
             

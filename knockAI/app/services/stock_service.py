@@ -20,58 +20,102 @@ class StockService:
         self.twelve_data_key = os.getenv("TWELVE_DATA_API_KEY", "")
         self.yahoo_finance_enabled = os.getenv("YAHOO_FINANCE_ENABLED", "true").lower() == "true"
 
+    def _convert_korean_symbol(self, symbol: str) -> str:
+        """한국 주식 심볼을 Yahoo Finance 형식으로 변환 (예: 005930 -> 005930.KS)"""
+        # 6자리 숫자로 시작하는 한국 주식 심볼인 경우
+        if symbol.isdigit() and len(symbol) == 6:
+            # 코스피/코스닥 구분 없이 일단 .KS로 시도 (대부분 코스피)
+            return f"{symbol}.KS"
+        return symbol
+
     async def get_current_price(self, symbol: str) -> Optional[Decimal]:
         """현재 주가 조회 (Yahoo Finance 우선)"""
         try:
+            print(f"가격 조회 시작: {symbol}")
             if self.yahoo_finance_enabled:
-                price = await self._get_price_from_yahoo_finance(symbol)
+                # 한국 주식 심볼 변환
+                yahoo_symbol = self._convert_korean_symbol(symbol)
+                print(f"한국 주식 심볼 변환: {symbol} -> {yahoo_symbol}")
+                price = await self._get_price_from_yahoo_finance(yahoo_symbol)
                 if price:
+                    print(f"가격 조회 성공 (Yahoo Finance .KS): {symbol} = {price}")
                     return price
+                # .KS로 실패하면 .KQ (코스닥)로 재시도
+                if symbol.isdigit() and len(symbol) == 6:
+                    yahoo_symbol_kq = f"{symbol}.KQ"
+                    print(f"코스닥 심볼로 재시도: {yahoo_symbol_kq}")
+                    price = await self._get_price_from_yahoo_finance(yahoo_symbol_kq)
+                    if price:
+                        print(f"가격 조회 성공 (Yahoo Finance .KQ): {symbol} = {price}")
+                        return price
 
             if self.alpha_vantage_key:
+                print(f"Alpha Vantage 조회 시도: {symbol}")
                 price = await self._get_price_from_alpha_vantage(symbol)
                 if price:
+                    print(f"가격 조회 성공 (Alpha Vantage): {symbol} = {price}")
                     return price
 
             if self.twelve_data_key:
+                print(f"Twelve Data 조회 시도: {symbol}")
                 price = await self._get_price_from_twelve_data(symbol)
                 if price:
+                    print(f"가격 조회 성공 (Twelve Data): {symbol} = {price}")
                     return price
 
+            print(f"모든 API에서 가격 조회 실패: {symbol}")
             return None
         except Exception as e:
             print(f"주가 조회 오류: {symbol} - {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     async def _get_price_from_yahoo_finance(self, symbol: str) -> Optional[Decimal]:
         """Yahoo Finance API를 통한 주가 조회"""
         try:
-            # yfinance 라이브러리 사용
-            ticker = yf.Ticker(symbol)
-            data = ticker.history(period="1d")
+            print(f"Yahoo Finance 조회 시작: {symbol}")
+            import asyncio
             
-            if not data.empty:
-                latest = data.iloc[-1]
-                return Decimal(str(latest['Close']))
-            
-            # 대안: 직접 API 호출
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=1d"
-                response = await client.get(url)
+            # yfinance는 동기 라이브러리이므로 executor에서 실행
+            def get_price_sync():
+                ticker = yf.Ticker(symbol)
+                # info() 메서드로 현재가 조회 (더 빠르고 안정적)
+                try:
+                    info = ticker.info
+                    if info and isinstance(info, dict):
+                        if 'currentPrice' in info and info['currentPrice']:
+                            return Decimal(str(info['currentPrice']))
+                        elif 'regularMarketPrice' in info and info['regularMarketPrice']:
+                            return Decimal(str(info['regularMarketPrice']))
+                except Exception as info_error:
+                    print(f"info() 메서드 실패: {symbol} - {info_error}")
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    if "chart" in data and "result" in data["chart"]:
-                        result = data["chart"]["result"]
-                        if result and len(result) > 0:
-                            meta = result[0].get("meta", {})
-                            price = meta.get("regularMarketPrice")
-                            if price:
-                                return Decimal(str(price))
+                # history() 메서드로 시도
+                try:
+                    data = ticker.history(period="1d")
+                    if not data.empty:
+                        latest = data.iloc[-1]
+                        return Decimal(str(latest['Close']))
+                except Exception as hist_error:
+                    print(f"history() 메서드 실패: {symbol} - {hist_error}")
+                
+                return None
             
+            # 비동기로 실행
+            loop = asyncio.get_event_loop()
+            price = await loop.run_in_executor(None, get_price_sync)
+            
+            if price:
+                print(f"Yahoo Finance 가격 조회 성공: {symbol} = {price}")
+                return price
+            
+            print(f"Yahoo Finance 가격 조회 실패: {symbol}")
             return None
         except Exception as e:
             print(f"Yahoo Finance API 오류: {symbol} - {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     async def _get_price_from_alpha_vantage(self, symbol: str) -> Optional[Decimal]:
@@ -134,10 +178,17 @@ class StockService:
             if not price:
                 return False
 
-            # Yahoo Finance에서 상세 정보 가져오기
+            # Yahoo Finance에서 상세 정보 가져오기 (한국 주식 심볼 변환)
+            yahoo_symbol = self._convert_korean_symbol(symbol)
             async with httpx.AsyncClient(timeout=10.0) as client:
-                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=1d"
+                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{yahoo_symbol}?interval=1d&range=1d"
                 response = await client.get(url)
+                
+                # .KS로 실패하면 .KQ로 재시도
+                if response.status_code != 200 and symbol.isdigit() and len(symbol) == 6:
+                    yahoo_symbol_kq = f"{symbol}.KQ"
+                    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{yahoo_symbol_kq}?interval=1d&range=1d"
+                    response = await client.get(url)
                 
                 if response.status_code == 200:
                     data = response.json()

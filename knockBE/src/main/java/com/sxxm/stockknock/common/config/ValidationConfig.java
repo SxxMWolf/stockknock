@@ -1,5 +1,6 @@
 package com.sxxm.stockknock.common.config;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.Map;
 /**
  * Validation 에러 처리
  */
+@Hidden
 @RestControllerAdvice
 public class ValidationConfig {
 

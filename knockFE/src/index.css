@@ -1,66 +1,114 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #1a1a1a;
+  background-color: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  background: white;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
+  box-shadow: none;
+  text-shadow: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:focus,
+button:focus-visible,
+button:active,
+button:hover,
+button:focus:active,
+button:focus-visible:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  color: inherit !important;
+  background: inherit !important;
+  background-color: inherit !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* 모든 버튼의 active 상태에서 색상 변경 방지 */
+button:active {
+  color: inherit !important;
+  background: inherit !important;
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 입력 요소 스타일 정리 */
+input,
+textarea {
+  outline: none;
+  border: none;
+  font-family: inherit;
+  color: #1a1a1a;
+  caret-color: #1a1a1a;
+  background: white;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+input::selection,
+textarea::selection {
+  background: #e0e0e0;
+  color: #1a1a1a;
+}
+
+/* iOS Safari에서 빨간 점선 제거 */
+input,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }

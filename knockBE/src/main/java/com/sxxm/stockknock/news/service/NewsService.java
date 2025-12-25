@@ -22,11 +22,38 @@ public class NewsService {
     @Autowired
     private FastApiService fastApiService;
 
+    /**
+     * 최근 뉴스 조회 (DB에서만 조회)
+     * 
+     * 프론트엔드 요청 시 외부 API를 호출하지 않고,
+     * 정기적으로 수집된 DB의 뉴스만 반환합니다.
+     * 
+     * @param days 조회할 일수 (기본값: 7일)
+     * @return 최근 뉴스 목록
+     */
     public List<NewsDto> getRecentNews(int days) {
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minusDays(days);
         
+        System.out.println("[뉴스 조회] 기간: " + startDate + " ~ " + endDate);
+        
+        // DB에서 최근 뉴스 조회
         List<News> newsList = newsRepository.findByPublishedAtBetweenOrderByPublishedAtDesc(startDate, endDate);
+        System.out.println("[뉴스 조회] 데이터베이스에서 조회된 뉴스 개수: " + newsList.size());
+        
+        // 뉴스가 없는 경우 30일로 확장 조회 (사용자 경험 개선)
+        if (newsList.isEmpty()) {
+            System.out.println("[뉴스 조회] 최근 " + days + "일 내 뉴스가 없어서 30일로 확장 조회 시도");
+            LocalDateTime extendedStartDate = endDate.minusDays(30);
+            newsList = newsRepository.findByPublishedAtBetweenOrderByPublishedAtDesc(extendedStartDate, endDate);
+            System.out.println("[뉴스 조회] 30일 확장 조회 결과: " + newsList.size() + "개");
+            
+            // 여전히 뉴스가 없으면 경고 로그만 출력 (프론트엔드는 빈 배열 반환)
+            if (newsList.isEmpty()) {
+                System.out.println("[뉴스 조회] 경고: 데이터베이스에 뉴스 데이터가 없습니다. 스케줄러가 뉴스를 수집할 때까지 기다려주세요.");
+            }
+        }
+        
         return newsList.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -60,14 +87,15 @@ public class NewsService {
             
             if (analysisResult != null && !analysisResult.isEmpty()) {
                 // FastAPI에서 분석 결과를 받아서 저장
-                NewsAnalysis analysis = NewsAnalysis.builder()
-                        .newsId(news.getId())
-                        .news(news)
-                        .summary((String) analysisResult.getOrDefault("summary", ""))
-                        .aiComment((String) analysisResult.getOrDefault("ai_comment", ""))
-                        .sentiment((String) analysisResult.getOrDefault("sentiment", "neutral"))
-                        .impactScore(((Number) analysisResult.getOrDefault("impact_score", 5)).intValue())
-                        .build();
+                // @MapsId를 사용하지만 newsId를 명시적으로 설정하여 안전하게 처리
+                NewsAnalysis analysis = new NewsAnalysis();
+                analysis.setNewsId(news.getId()); // newsId를 명시적으로 설정
+                analysis.setNews(news); // @MapsId를 위한 news 객체 설정
+                analysis.setSummary((String) analysisResult.getOrDefault("summary", ""));
+                analysis.setAiComment((String) analysisResult.getOrDefault("ai_comment", ""));
+                analysis.setSentiment((String) analysisResult.getOrDefault("sentiment", "neutral"));
+                analysis.setImpactScore(((Number) analysisResult.getOrDefault("impact_score", 5)).intValue());
+                analysis.setAnalyzedAt(LocalDateTime.now());
 
                 analysis = newsAnalysisRepository.save(analysis);
                 news.setAnalysis(analysis);
@@ -93,26 +121,6 @@ public class NewsService {
                 .build();
     }
 
-    private String extractSummary(String analysis) {
-        // 간단한 추출 로직 (실제로는 더 정교하게 파싱)
-        return analysis.length() > 200 ? analysis.substring(0, 200) + "..." : analysis;
-    }
-
-    private String determineSentiment(String analysis) {
-        String lower = analysis.toLowerCase();
-        if (lower.contains("긍정") || lower.contains("상승") || lower.contains("호재")) {
-            return "positive";
-        } else if (lower.contains("부정") || lower.contains("하락") || lower.contains("악재")) {
-            return "negative";
-        }
-        return "neutral";
-    }
-
-    private Integer calculateImpactScore(String analysis) {
-        // 간단한 점수 계산 (실제로는 더 정교하게)
-        return 5; // 기본값
-    }
-
     public NewsDto convertToDto(News news) {
         List<String> relatedSymbols = news.getStockRelations() != null ?
                 news.getStockRelations().stream()
@@ -121,14 +129,20 @@ public class NewsService {
                 List.of();
 
         NewsAnalysisDto analysisDto = null;
-        if (news.getAnalysis() != null) {
+        try {
+            // Lazy loading을 안전하게 처리
             NewsAnalysis analysis = news.getAnalysis();
+            if (analysis != null && analysis.getNewsId() != null) {
             analysisDto = NewsAnalysisDto.builder()
                     .summary(analysis.getSummary())
                     .impactAnalysis(analysis.getAiComment())
                     .sentiment(analysis.getSentiment())
                     .impactScore(analysis.getImpactScore())
                     .build();
+            }
+        } catch (Exception e) {
+            // Lazy loading 실패 시 무시 (분석 데이터가 없는 것으로 처리)
+            System.err.println("뉴스 분석 데이터 로딩 실패 (뉴스 ID: " + news.getId() + "): " + e.getMessage());
         }
 
         return NewsDto.builder()
@@ -306,6 +320,133 @@ public class NewsService {
         if (union.isEmpty()) return 0.0;
 
         return (double) intersection.size() / union.size();
+    }
+
+    @Autowired
+    private com.sxxm.stockknock.ai.service.AIService aiService;
+
+    /**
+     * 오늘의 주요 뉴스 5줄 요약
+     * 최근 24시간 내 뉴스 중 상위 10개를 선택하여 AI로 요약
+     */
+    public String summarizeTodayNews() {
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusHours(24); // 최근 24시간
+
+        // 최근 24시간 내 뉴스 조회
+        List<News> todayNews = newsRepository
+                .findByPublishedAtBetweenOrderByPublishedAtDesc(startDate, endDate);
+
+        if (todayNews.isEmpty()) {
+            return "오늘 수집된 뉴스가 없습니다.";
+        }
+
+        // 상위 10개 뉴스 선택 (이미 분석된 뉴스 우선)
+        List<News> topNews = todayNews.stream()
+                .sorted((a, b) -> {
+                    // 분석된 뉴스 우선
+                    boolean aHasAnalysis = a.getAnalysis() != null;
+                    boolean bHasAnalysis = b.getAnalysis() != null;
+                    if (aHasAnalysis != bHasAnalysis) {
+                        return bHasAnalysis ? 1 : -1;
+                    }
+                    // 최신순
+                    return b.getPublishedAt().compareTo(a.getPublishedAt());
+                })
+                .limit(10)
+                .collect(Collectors.toList());
+
+        // 뉴스 제목과 요약 수집
+        StringBuilder newsText = new StringBuilder();
+        newsText.append("다음은 오늘의 주요 주식 뉴스들입니다. 이 뉴스들을 종합하여 5줄로 요약해주세요:\n\n");
+        
+        for (int i = 0; i < topNews.size(); i++) {
+            News news = topNews.get(i);
+            newsText.append((i + 1)).append(". ").append(news.getTitle()).append("\n");
+            
+            // 분석된 요약이 있으면 사용, 없으면 제목만
+            if (news.getAnalysis() != null && news.getAnalysis().getSummary() != null) {
+                String summary = news.getAnalysis().getSummary();
+                if (!summary.isEmpty() && !summary.equals("분석 중 오류가 발생했습니다.")) {
+                    newsText.append("   ").append(summary).append("\n");
+                }
+            }
+            newsText.append("\n");
+        }
+
+        // AIService를 통해 요약 요청
+        try {
+            String prompt = newsText.toString() + "\n위 뉴스들을 종합하여 5줄로 요약해주세요. 각 줄은 핵심 내용을 간결하게 담아주세요.";
+            String summary = aiService.generateResponse(prompt);
+            return summary;
+        } catch (Exception e) {
+            System.err.println("뉴스 요약 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // AI 실패 시 간단한 요약 생성
+        return generateSimpleSummary(topNews);
+    }
+
+    /**
+     * 간단한 요약 생성 (AI 실패 시 사용)
+     */
+    private String generateSimpleSummary(List<News> newsList) {
+        if (newsList.isEmpty()) {
+            return "오늘 수집된 뉴스가 없습니다.";
+        }
+
+        StringBuilder summary = new StringBuilder();
+        
+        int count = Math.min(5, newsList.size());
+        for (int i = 0; i < count; i++) {
+            News news = newsList.get(i);
+            summary.append((i + 1)).append(". ").append(news.getTitle());
+            
+            if (news.getAnalysis() != null && news.getAnalysis().getSummary() != null) {
+                String analysisSummary = news.getAnalysis().getSummary();
+                if (!analysisSummary.isEmpty() && !analysisSummary.equals("분석 중 오류가 발생했습니다.")) {
+                    // 요약이 너무 길면 자르기
+                    String shortSummary = analysisSummary.length() > 80 
+                            ? analysisSummary.substring(0, 80) + "..." 
+                            : analysisSummary;
+                    summary.append(" - ").append(shortSummary);
+                }
+            }
+            if (i < count - 1) {
+                summary.append("\n");
+            }
+        }
+        
+        return summary.toString();
+    }
+
+    /**
+     * 일정 기간 이상 된 뉴스 삭제
+     * @param days 삭제할 뉴스의 최소 보관 기간 (일)
+     * @return 삭제된 뉴스 개수
+     */
+    public int deleteNewsOlderThan(int days) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+        
+        System.out.println("[뉴스 삭제] " + days + "일 이상 된 뉴스 삭제 시작 (기준일: " + cutoffDate + ")");
+        
+        // 삭제할 뉴스 조회
+        List<News> oldNews = newsRepository.findByPublishedAtBefore(cutoffDate);
+        int count = oldNews.size();
+        
+        if (count > 0) {
+            System.out.println("[뉴스 삭제] 삭제 대상 뉴스 개수: " + count);
+            
+            // 뉴스 삭제 (CASCADE로 관련 분석 데이터도 자동 삭제됨)
+            newsRepository.deleteByPublishedAtBefore(cutoffDate);
+            
+            System.out.println("[뉴스 삭제] " + count + "개의 오래된 뉴스가 삭제되었습니다.");
+        } else {
+            System.out.println("[뉴스 삭제] 삭제할 뉴스가 없습니다.");
+        }
+        
+        return count;
     }
 }
 

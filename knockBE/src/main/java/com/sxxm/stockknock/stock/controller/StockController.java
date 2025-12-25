@@ -2,6 +2,7 @@ package com.sxxm.stockknock.stock.controller;
 
 import com.sxxm.stockknock.stock.dto.StockDto;
 import com.sxxm.stockknock.stock.service.StockService;
+import com.sxxm.stockknock.stock.service.StockPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ public class StockController {
 
     @Autowired
     private StockService stockService;
+
+    @Autowired
+    private StockPriceService stockPriceService;
 
     @GetMapping("/symbol/{symbol}")
     public ResponseEntity<StockDto> getStockBySymbol(@PathVariable String symbol) {
@@ -42,6 +46,19 @@ public class StockController {
     public ResponseEntity<List<StockDto>> getStocksByIndustry(@PathVariable String industry) {
         List<StockDto> stocks = stockService.getStocksByIndustry(industry);
         return ResponseEntity.ok(stocks);
+    }
+
+    /**
+     * 특정 종목의 가격을 수동으로 업데이트
+     */
+    @PostMapping("/{symbol}/update-price")
+    public ResponseEntity<String> updateStockPrice(@PathVariable String symbol) {
+        try {
+            stockPriceService.updateStockPriceFromYahooFinance(symbol);
+            return ResponseEntity.ok("가격 업데이트 완료: " + symbol);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("가격 업데이트 실패: " + e.getMessage());
+        }
     }
 }
 

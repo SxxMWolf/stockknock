@@ -14,6 +14,7 @@ export interface StockDto {
   dayHigh: number;
   dayLow: number;
   volume: number;
+  lastUpdated?: string; // ISO 8601 형식의 날짜 문자열
 }
 
 // FastAPI StockPriceResponse
@@ -41,6 +42,11 @@ export const stockAPI = {
 
   getByCountry: async (country: string): Promise<StockDto[]> => {
     const response = await apiClient.get<StockDto[]>(`/stocks/country/${country}`);
+    return response.data;
+  },
+
+  getByIndustry: async (industry: string): Promise<StockDto[]> => {
+    const response = await apiClient.get<StockDto[]>(`/stocks/industry/${industry}`);
     return response.data;
   },
 

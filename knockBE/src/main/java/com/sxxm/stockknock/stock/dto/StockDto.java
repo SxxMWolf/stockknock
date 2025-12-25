@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -24,5 +25,7 @@ public class StockDto {
     private BigDecimal dayHigh;
     private BigDecimal dayLow;
     private Long volume;
+    // 가격 업데이트 시점 (참고용)
+    private LocalDateTime lastUpdated;
 }
 

@@ -2,6 +2,16 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+.news-loading,
+.news-error,
+.news-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
 }
 
 .news h1 {
@@ -19,10 +29,12 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .news-item:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .news-item h3 {
@@ -62,10 +74,49 @@
 }
 
 .sentiment.negative {
-  color: #ef4444;
+  color: #111827;
 }
 
 .sentiment.neutral {
   color: #666;
+}
+
+.btn-read-more {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: transparent !important;
+  color: #667eea !important;
+  border: none !important;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  outline: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.btn-read-more:focus,
+.btn-read-more:focus-visible,
+.btn-read-more:active {
+  outline: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+  color: #667eea !important;
+  -webkit-tap-highlight-color: transparent !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.btn-read-more:hover {
+  color: #5568d3 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
 }
 

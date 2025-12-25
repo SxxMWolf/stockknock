@@ -70,14 +70,17 @@
 - 사용자별 관심 종목 목록 관리
 
 ### 🔐 사용자 인증 및 계정 관리
-- **이메일 기반 회원가입 및 로그인** (아이디 없음, 이메일이 로그인 ID)
+- **아이디 기반 회원가입 및 로그인**
 - JWT 토큰 기반 인증
-- **닉네임 설정 및 관리** (회원가입 시 필수 입력)
-- **이메일 변경 기능** (보안 강화된 인증 코드 기반)
-  - 새 이메일로 6자리 인증 코드 전송 (10분 유효)
-  - 인증 코드 확인 및 현재 비밀번호 검증 후 이메일 변경
-  - 보안을 위한 2단계 인증 프로세스
-  - 만료된 인증 코드 자동 정리 (스케줄러)
+- **마이페이지 - 개인정보 관리**
+  - 아이디 변경 (비밀번호 확인 필요)
+  - 닉네임 변경
+  - 이메일 변경 (보안 강화된 인증 코드 기반)
+    - 새 이메일로 6자리 인증 코드 전송 (10분 유효)
+    - 인증 코드 확인 및 현재 비밀번호 검증 후 이메일 변경
+    - 보안을 위한 2단계 인증 프로세스
+    - 만료된 인증 코드 자동 정리 (스케줄러)
+  - 비밀번호 변경 (현재 비밀번호 확인 필요)
 
 ---
 
@@ -93,6 +96,7 @@
 - **스케줄러**: Spring Scheduling
 - **HTTP 클라이언트**: Spring WebFlux (WebClient)
 - **이메일**: Spring Mail (Gmail SMTP)
+- **API 문서**: SpringDoc OpenAPI (Swagger UI)
 - **빌드 도구**: Gradle
 
 ### Frontend (knockFE)
@@ -178,12 +182,15 @@ knockBE/src/main/java/com/sxxm/stockknock/
 ```
 knockFE/src/
 ├── api/                    # API 클라이언트
-│   ├── client.ts          # Axios 인스턴스
+│   ├── client.ts          # Axios 인스턴스 (Spring Boot)
+│   ├── fastApiClient.ts   # FastAPI 클라이언트 (내부 사용)
 │   ├── auth.ts            # 인증 API
 │   ├── stock.ts           # 주식 API
 │   ├── portfolio.ts      # 포트폴리오 API
-│   ├── news.ts            # 뉴스 API
-│   └── ai.ts              # AI API
+│   ├── news.ts            # 뉴스 API (Spring Boot)
+│   ├── ai.ts              # AI API (Spring Boot)
+│   ├── watchlist.ts       # 관심 종목 API
+│   └── alerts.ts          # 가격 알림 API
 │
 ├── pages/                  # 페이지 컴포넌트
 │   ├── Login.tsx          # 로그인 페이지
@@ -191,7 +198,8 @@ knockFE/src/
 │   ├── Portfolio.tsx     # 포트폴리오
 │   ├── News.tsx           # 뉴스
 │   ├── AIChat.tsx         # AI 채팅
-│   └── EmailChange.tsx    # 이메일 변경
+│   ├── EmailChange.tsx    # 이메일 변경
+│   └── MyPage.tsx         # 마이페이지
 │
 ├── context/                # Context API
 │   └── AuthContext.tsx   # 인증 컨텍스트
@@ -450,6 +458,8 @@ erDiagram
 | `ai_comment` | TEXT | AI 코멘트 | - |
 | `analyzed_at` | TIMESTAMP | 분석 시간 | DEFAULT CURRENT_TIMESTAMP |
 
+**참고**: DTO에서는 `impactAnalysis` 필드를 사용하지만, 엔티티에서는 `aiComment` 필드를 사용합니다. 서비스 레이어에서 변환 처리됩니다.
+
 **NewsStockRelation 테이블 (뉴스-종목 연관):**
 
 | 컬럼명 | 타입 | 설명 | 제약조건 |
@@ -495,15 +505,16 @@ erDiagram
 | 컬럼명 | 타입 | 설명 | 제약조건 |
 |--------|------|------|---------|
 | `id` | BIGINT | 기본 키 | PK, AUTO_INCREMENT |
-| `email` | VARCHAR(255) | 이메일 (로그인 ID) | **UK**, NOT NULL |
+| `username` | VARCHAR(255) | 아이디 (로그인 ID) | **UK**, NOT NULL |
+| `email` | VARCHAR(255) | 이메일 | **UK**, NOT NULL |
 | `password` | VARCHAR(255) | 비밀번호 (암호화) | NOT NULL |
 | `nickname` | VARCHAR(255) | 닉네임 | - |
 | `created_at` | TIMESTAMP | 생성 시간 | DEFAULT CURRENT_TIMESTAMP |
 
 **주요 변경사항:**
-- **아이디 필드 제거**: 별도의 로그인 아이디 없음, 이메일이 로그인 ID 역할
-- **`name` 필드 제거**: `nickname` 필드로 대체 (회원가입 시 필수 입력)
-- **`investment_style` 필드 제거**: 불필요한 필드 제거
+- **아이디 기반 로그인**: `username` 필드로 로그인 (이메일과 별도)
+- **이메일과 아이디 분리**: 이메일은 통신용, 아이디는 로그인용
+- **마이페이지 기능**: 아이디, 닉네임, 이메일, 비밀번호 변경 지원
 - **이메일 변경 기능**: `EmailVerification` 테이블을 통한 인증 코드 기반 이메일 변경 지원
 
 #### 🔐 EmailVerification
@@ -682,6 +693,10 @@ gradle bootRun
 
 Backend는 기본적으로 `http://localhost:8080`에서 실행됩니다.
 
+**Swagger UI 접속:**
+- `http://localhost:8080/swagger-ui.html` - API 문서 및 테스트 인터페이스
+- `http://localhost:8080/v3/api-docs` - OpenAPI JSON 스펙
+
 ### 5. Frontend 실행
 
 ```bash
@@ -694,9 +709,21 @@ npm install
 npm run dev
 ```
 
-Frontend는 기본적으로 `http://localhost:3000`에서 실행됩니다.
+Frontend는 기본적으로 `http://localhost:5173`에서 실행됩니다 (Vite 기본 포트).
 
-### 6. 빠른 시작 스크립트
+### 6. FastAPI 실행 (선택사항, 내부 서비스)
+
+FastAPI는 Spring Boot에서 내부적으로 호출하는 서비스입니다. 개발 환경에서 테스트하려면:
+
+```bash
+cd knockAI
+source venv/bin/activate
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**참고**: 프론트엔드는 Spring Boot API만 호출하며, FastAPI는 백엔드 내부 서비스로만 사용됩니다.
+
+### 7. 빠른 시작 스크립트
 
 프로젝트 루트에 `quick_start.sh` 스크립트를 사용할 수 있습니다:
 
@@ -704,6 +731,13 @@ Frontend는 기본적으로 `http://localhost:3000`에서 실행됩니다.
 chmod +x quick_start.sh
 ./quick_start.sh
 ```
+
+### 8. Swagger UI 접속
+
+백엔드가 실행되면 Swagger UI에 접속할 수 있습니다:
+
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **API Docs (JSON)**: `http://localhost:8080/v3/api-docs`
 
 ---
 
@@ -786,57 +820,142 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
 
 ## 🔌 외부 API 연동
 
-### 1. Yahoo Finance (주가 정보, 기본 사용)
+### 📊 주가 API (Stock Price APIs)
 
-**무료, API 키 불필요**
+StockKnock은 여러 주가 API를 지원하며, 우선순위에 따라 자동으로 폴백(fallback)합니다.
 
-- Yahoo Finance 비공식 API를 직접 호출
-- 제한: 초당 2회 요청 (자동 rate limiting 적용)
-- 폴백 지원: Alpha Vantage, Twelve Data
+#### 1. Yahoo Finance (기본, 무료) ⭐
 
-**비용 최적화:**
-- 시장 개장 시간에만 업데이트 (평일 09:00-15:30)
-- 여러 API 소스로 자동 폴백
+**우선순위: 1순위 (기본 사용)**
 
-### 2. OpenAI GPT API
+- **URL**: `https://query1.finance.yahoo.com/v8/finance/chart/{symbol}`
+- **API 키**: 불필요 (무료)
+- **제한**: 초당 2회 요청
+- **설정**: `application.properties` → `stock.api.yahoo-finance.enabled=true` (기본값)
+- **용도**: 주식 가격, 일일 고가/저가, 거래량 등 실시간 정보
+- **장점**: 무료, API 키 불필요, 안정적
+- **단점**: 비공식 API (공식 지원 없음)
 
-1. [OpenAI Platform](https://platform.openai.com/) 접속
-2. API Keys 메뉴에서 새 키 생성
-3. 환경 변수 `OPENAI_API_KEY`에 설정
+**사용 방법:**
+- 별도 설정 불필요, 기본적으로 활성화됨
+- `StockPriceService`에서 자동으로 사용
 
-**제한사항**: 사용량에 따라 비용 발생
+#### 2. Alpha Vantage (백업 옵션)
+
+**우선순위: 2순위 (Yahoo Finance 실패 시)**
+
+- **URL**: `https://www.alphavantage.co/query`
+- **API 키**: 필수 (환경 변수 `ALPHA_VANTAGE_API_KEY`)
+- **제한**: 
+  - 무료 플랜: 일일 25회 요청
+  - 분당 5회 요청
+- **설정**: `application.properties` → `stock.api.alpha-vantage.key=${ALPHA_VANTAGE_API_KEY:}`
+- **용도**: 주식 가격, 전일 종가, 고가/저가, 거래량
+- **장점**: 공식 API, 안정적
+- **단점**: 무료 플랜 제한이 엄격함
+
+**설정 방법:**
+1. [Alpha Vantage](https://www.alphavantage.co/support/#api-key)에서 API 키 발급
+2. 환경 변수 `ALPHA_VANTAGE_API_KEY` 설정
+3. 백엔드 재시작
+
+#### 3. Twelve Data (백업 옵션)
+
+**우선순위: 3순위 (Yahoo Finance, Alpha Vantage 실패 시)**
+
+- **URL**: `https://api.twelvedata.com/price`
+- **API 키**: 필수 (환경 변수 `TWELVE_DATA_API_KEY`)
+- **제한**: 무료 플랜 일일 800회 요청
+- **설정**: `application.properties` → `stock.api.twelve-data.key=${TWELVE_DATA_API_KEY:}`
+- **용도**: 주식 가격 조회
+- **장점**: 무료 플랜 제한이 넉넉함
+- **단점**: 기본 가격 정보만 제공 (고가/저가 등 제한적)
+
+**설정 방법:**
+1. [Twelve Data](https://twelvedata.com/) 회원가입
+2. Dashboard에서 API 키 확인
+3. 환경 변수 `TWELVE_DATA_API_KEY` 설정
+4. 백엔드 재시작
+
+#### 4. FastAPI (내부 서비스)
+
+**용도**: 주가 조회 및 업데이트 (내부 처리)
+
+- **URL**: `http://localhost:8000/api/stock/{symbol}/price`
+- **설정**: `application.properties` → `fastapi.base-url=${FASTAPI_BASE_URL:http://localhost:8000}`
+- **용도**: Spring Boot에서 내부적으로 호출하는 주가 조회 서비스
+- **참고**: 프론트엔드는 직접 호출하지 않음
+
+**주가 API 우선순위:**
+```
+Yahoo Finance (기본) 
+  → Alpha Vantage (실패 시)
+    → Twelve Data (실패 시)
+      → FastAPI (내부 서비스)
+        → DB 저장된 최신 가격 (최종 폴백)
+```
+
+### 📰 뉴스 API (News API)
+
+#### NewsAPI (newsapi.org)
+
+**뉴스 수집 전용 API**
+
+- **URL**: `https://newsapi.org/v2/everything`
+- **API 키**: 필수 (환경 변수 `NEWS_API_KEY`)
+- **제한**: 
+  - 무료 플랜: 일일 100회 요청
+  - 개발자 플랜: 일일 1,000회 요청
+- **설정**: `application.properties` → `news.api.newsapi.key=${NEWS_API_KEY:}`
+- **용도**: 주식 관련 뉴스 수집
+- **언어**: 한국어 (`language=ko`)
+- **정렬**: 발행일 기준 내림차순 (`sortBy=publishedAt`)
+
+**설정 방법:**
+1. [NewsAPI](https://newsapi.org/register) 회원가입
+2. Dashboard에서 API 키 확인
+3. 환경 변수 `NEWS_API_KEY` 설정
+4. 백엔드 재시작
+
+**뉴스 수집 전략:**
+- **정기 자동 수집**: 하루 2회 (오전 9시, 오후 4시)
+- **수동 수집**: 개발/관리자용 API (`POST /api/news/collect`)
+- **테스트 데이터**: 개발용 API (`POST /api/news/test-data`)
+- **중복 제거**: 제목 유사도 기반 자동 제거
+- **AI 분석**: 수집된 뉴스 중 주요 20개만 분석 (비용 최적화)
+
+**뉴스 수집 쿼리:**
+- 일반 주식 뉴스: `"주식 OR 증시 OR 투자"`
+- 종목별 뉴스: `"{종목명} OR {심볼}"` (예: "삼성전자 OR 005930")
+
+### 🤖 AI API
+
+#### OpenAI GPT API
+
+**AI 분석 전용 API**
+
+- **URL**: `https://api.openai.com/v1/chat/completions`
+- **API 키**: 필수 (환경 변수 `OPENAI_API_KEY`)
+- **모델**: GPT-4o-mini (기본값, `application.properties`에서 설정 가능)
+- **설정**: 
+  - `application.properties` → `gpt.api.key=${OPENAI_API_KEY}`
+  - `application.properties` → `gpt.model=${GPT_MODEL:gpt-4o-mini}`
+
+**용도:**
+- 뉴스 요약 및 주가 영향 분석
+- 포트폴리오 AI 분석
+- AI 채팅 (대화형 애널리스트)
 
 **비용 최적화:**
 - 주요 20개 뉴스만 AI 분석
 - 골든 뉴스(주가 영향 높은 뉴스) 우선 분석
 - 중복 뉴스 자동 제거
 
-### 3. NewsAPI
-
-1. [NewsAPI](https://newsapi.org/register) 회원가입
-2. Dashboard에서 API 키 확인
-3. 환경 변수 `NEWS_API_KEY`에 설정
-
-**제한사항**: 무료 플랜 일일 100회 요청
-
-**비용 최적화:**
-- 매 2시간마다 수집 (기존 1시간에서 변경)
-- 주요 종목 뉴스만 선별 수집
-
-### 4. Alpha Vantage (주가 백업)
-
-1. [Alpha Vantage](https://www.alphavantage.co/support/#api-key)에서 API 키 발급
-2. 환경 변수 `ALPHA_VANTAGE_API_KEY`에 설정
-
-**제한사항**: 무료 플랜 일일 25회, 분당 5회
-
-### 5. Twelve Data (주가 백업)
-
-1. [Twelve Data](https://twelvedata.com/) 회원가입
-2. Dashboard에서 API 키 확인
-3. 환경 변수 `TWELVE_DATA_API_KEY`에 설정
-
-**제한사항**: 무료 플랜 일일 800회
+**설정 방법:**
+1. [OpenAI](https://platform.openai.com/) 회원가입
+2. API Keys 메뉴에서 새 키 생성
+3. 환경 변수 `OPENAI_API_KEY` 설정
+4. 백엔드 재시작
 
 ### 6. Gmail SMTP (이메일 알림)
 
@@ -859,6 +978,7 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
   - **Request Body**:
     ```json
     {
+      "username": "user123",
       "email": "user@example.com",
       "password": "password123",
       "nickname": "사용자닉네임"
@@ -868,22 +988,24 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
     ```json
     {
       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "username": "user123",
       "email": "user@example.com",
       "name": "사용자닉네임",
       "userId": 1
     }
     ```
   - **에러 응답** (400 Bad Request):
+    - 이미 사용 중인 아이디인 경우
     - 이미 등록된 이메일인 경우
 
 #### 로그인
 - **`POST /api/auth/login`**
-  - **설명**: 이메일과 비밀번호로 로그인 (이메일이 로그인 ID 역할)
+  - **설명**: 아이디(username)와 비밀번호로 로그인
   - **인증**: 불필요
   - **Request Body**:
     ```json
     {
-      "email": "user@example.com",
+      "username": "user123",
       "password": "password123"
     }
     ```
@@ -891,13 +1013,14 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
     ```json
     {
       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "username": "user123",
       "email": "user@example.com",
       "name": "사용자닉네임",
       "userId": 1
     }
     ```
   - **에러 응답** (400 Bad Request):
-    - 이메일 또는 비밀번호가 일치하지 않는 경우
+    - 아이디 또는 비밀번호가 일치하지 않는 경우
 
 #### 이메일 변경 인증 코드 전송
 - **`POST /api/auth/email/verification-code`**
@@ -952,6 +1075,72 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
     - 이미 사용 중인 이메일인 경우
   - **참고**: 이메일 변경 후 다시 로그인해야 합니다.
 
+#### 사용자 정보 조회
+- **`GET /api/auth/profile`**
+  - **설명**: 현재 로그인한 사용자의 정보 조회
+  - **인증**: 필요 (JWT 토큰)
+  - **Response** (200 OK):
+    ```json
+    {
+      "id": 1,
+      "username": "user123",
+      "email": "user@example.com",
+      "nickname": "사용자닉네임"
+    }
+    ```
+
+#### 사용자 정보 수정
+- **`PUT /api/auth/profile`**
+  - **설명**: 사용자 닉네임 수정
+  - **인증**: 필요 (JWT 토큰)
+  - **Request Body**:
+    ```json
+    {
+      "nickname": "새닉네임"
+    }
+    ```
+  - **Response** (200 OK): 수정된 사용자 정보
+
+#### 아이디 변경
+- **`PUT /api/auth/username`**
+  - **설명**: 아이디 변경 (비밀번호 확인 필요)
+  - **인증**: 필요 (JWT 토큰)
+  - **Request Body**:
+    ```json
+    {
+      "newUsername": "newuser123",
+      "password": "currentPassword123"
+    }
+    ```
+  - **Response** (200 OK): 변경된 사용자 정보
+  - **에러 응답** (400 Bad Request):
+    - 비밀번호가 일치하지 않는 경우
+    - 이미 사용 중인 아이디인 경우
+    - 현재 아이디와 동일한 경우
+  - **참고**: 아이디 변경 후 다시 로그인해야 합니다.
+
+#### 비밀번호 변경
+- **`PUT /api/auth/password`**
+  - **설명**: 비밀번호 변경 (현재 비밀번호 확인 필요)
+  - **인증**: 필요 (JWT 토큰)
+  - **Request Body**:
+    ```json
+    {
+      "currentPassword": "oldPassword123",
+      "newPassword": "newPassword123"
+    }
+    ```
+  - **Response** (200 OK):
+    ```json
+    {
+      "message": "비밀번호가 변경되었습니다."
+    }
+    ```
+  - **에러 응답** (400 Bad Request):
+    - 현재 비밀번호가 일치하지 않는 경우
+    - 새 비밀번호가 6자 미만인 경우
+    - 현재 비밀번호와 새 비밀번호가 동일한 경우
+
 ### 주식 (Stock)
 
 #### 심볼로 주식 조회
@@ -996,6 +1185,15 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
   - **인증**: 필요 (JWT 토큰)
   - **Path Variable**: `industry` (산업명)
   - **Response** (200 OK): 주식 배열
+
+### Swagger UI
+- **`http://localhost:8080/swagger-ui.html`**
+  - **설명**: API 문서 및 테스트 인터페이스
+  - **기능**:
+    - 모든 API 엔드포인트 확인
+    - API 테스트 (인증 포함)
+    - 요청/응답 스키마 확인
+    - JWT 토큰 인증 지원 (우측 상단 "Authorize" 버튼)
 
 ### 포트폴리오 (Portfolio)
 
@@ -1101,9 +1299,9 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
         "publishedAt": "2024-01-15T10:00:00",
         "analysis": {
           "summary": "...",
+          "impactAnalysis": "...",
           "sentiment": "positive",
-          "impactScore": 8,
-          "aiComment": "..."
+          "impactScore": 8
         },
         "relatedStocks": ["AAPL"]
       }
@@ -1122,7 +1320,15 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
   - **설명**: 특정 뉴스에 대한 AI 분석 수행 (요약, 감정 분석, 영향 점수 등)
   - **인증**: 필요 (JWT 토큰)
   - **Path Variable**: `newsId` (뉴스 ID)
-  - **Response** (200 OK): AI 분석 결과
+  - **Response** (200 OK):
+    ```json
+    {
+      "summary": "뉴스 요약...",
+      "impactAnalysis": "주가 영향 분석...",
+      "sentiment": "positive",
+      "impactScore": 8
+    }
+    ```
 
 ### 가격 알림 (Price Alert)
 
@@ -1221,17 +1427,20 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
   - **Request Body**:
     ```json
     {
-      "message": "애플 주식 전망이 어떻게 되나요?"
+      "question": "애플 주식 전망이 어떻게 되나요?",
+      "conversationType": "general"
     }
     ```
   - **Response** (200 OK):
     ```json
     {
-      "response": "애플 주식은 현재 강세를 보이고 있으며..."
+      "response": "애플 주식은 현재 강세를 보이고 있으며...",
+      "conversationType": "general"
     }
     ```
   - **문맥 유지**: 최근 5개 대화 기록을 자동으로 포함하여 문맥을 유지합니다.
   - **대화 기록**: 모든 대화는 자동으로 저장되어 이후 대화에서 참조됩니다.
+  - **참고**: 프론트엔드는 Spring Boot API만 호출하며, Spring Boot가 내부적으로 FastAPI를 호출합니다.
 
 ---
 
@@ -1317,33 +1526,39 @@ Spring Boot는 `spring.jpa.hibernate.ddl-auto=update` 설정으로 자동 스키
 2. `App.tsx`에서 라우트 추가
 3. `AuthContext`를 사용하여 인증 상태 확인
 
-#### 이메일 변경 기능 사용 예시
+#### 마이페이지 기능 사용 예시
 
-**프론트엔드에서 이메일 변경 기능을 사용하는 방법:**
+**프론트엔드에서 마이페이지 기능을 사용하는 방법:**
 
 ```typescript
 import { authAPI } from '../api/auth';
 
+// 사용자 정보 조회
+const profile = await authAPI.getProfile();
+console.log('현재 사용자:', profile);
+
+// 닉네임 변경
+await authAPI.updateProfile({ nickname: '새닉네임' });
+
+// 아이디 변경 (비밀번호 확인 필요)
+await authAPI.changeUsername('newuser123', 'currentPassword');
+
+// 비밀번호 변경
+await authAPI.changePassword({
+  currentPassword: 'oldPassword123',
+  newPassword: 'newPassword123'
+});
+
+// 이메일 변경 (인증 코드 기반)
 // 1단계: 인증 코드 전송
-try {
-  await authAPI.sendEmailVerificationCode('newemail@example.com');
-  console.log('인증 코드가 전송되었습니다.');
-} catch (error) {
-  console.error('인증 코드 전송 실패:', error);
-}
+await authAPI.sendEmailVerificationCode('newemail@example.com');
 
 // 2단계: 이메일 변경 (인증 코드 + 비밀번호 확인)
-try {
-  await authAPI.changeEmail(
-    'newemail@example.com',
-    '123456', // 6자리 인증 코드 (10분 유효)
-    'currentPassword' // 현재 비밀번호 (보안 확인용)
-  );
-  console.log('이메일이 변경되었습니다.');
-  // 이메일 변경 후 다시 로그인 필요
-} catch (error) {
-  console.error('이메일 변경 실패:', error);
-}
+await authAPI.changeEmail(
+  'newemail@example.com',
+  '123456', // 6자리 인증 코드 (10분 유효)
+  'currentPassword' // 현재 비밀번호 (보안 확인용)
+);
 ```
 
 **백엔드에서 이메일 인증 서비스를 사용하는 방법:**
@@ -1435,9 +1650,10 @@ boolean isVerified = emailVerificationService.isEmailVerified("newemail@example.
 
 ### Frontend가 API를 호출하지 못함
 
-1. Backend가 실행 중인지 확인
-2. CORS 설정 확인
-3. `src/api/client.ts`의 baseURL 확인
+1. Backend가 실행 중인지 확인 (`http://localhost:8080`)
+2. CORS 설정 확인 (Spring Boot SecurityConfig)
+3. `src/api/client.ts`의 baseURL 확인 (`http://localhost:8080/api`)
+4. **중요**: FastAPI는 프론트엔드에서 직접 호출하지 않음 (Spring Boot를 통해서만)
 
 ### 주가가 업데이트되지 않음
 

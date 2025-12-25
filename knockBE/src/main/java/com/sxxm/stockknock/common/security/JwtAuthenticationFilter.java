@@ -23,6 +23,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        String path = request.getRequestURI();
+        
+        // Swagger 및 공개 API 경로는 필터를 건너뜀
+        if (path.startsWith("/swagger-ui") || 
+            path.startsWith("/v3/api-docs") || 
+            path.startsWith("/swagger-resources") ||
+            path.startsWith("/webjars") ||
+            path.startsWith("/configuration") ||
+            path.startsWith("/api/news") || // 뉴스는 공개 API
+            path.startsWith("/api/auth") || // 인증 API는 공개
+            path.startsWith("/api/stocks") || // 주식 정보도 공개
+            path.equals("/favicon.ico")) {
+            System.out.println("JWT 필터 건너뜀: " + path);
+            chain.doFilter(request, response);
+            return;
+        }
+        
+        System.out.println("JWT 필터 처리 중: " + path);
+        
         final String requestTokenHeader = request.getHeader("Authorization");
 
         String email = null;

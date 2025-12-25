@@ -20,14 +20,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    const email = localStorage.getItem('email');
+    const name = localStorage.getItem('name');
+    
     if (token && userId) {
       setIsAuthenticated(true);
       setUser({
         token,
         userId: parseInt(userId),
-        username: '',
-        email: '',
-        name: '',
+        username: username || '',
+        email: email || '',
+        name: name || '',
       });
     }
   }, []);
@@ -36,12 +40,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const response = await authAPI.login({ username, password });
     setUser(response);
     setIsAuthenticated(true);
+    // localStorage는 authAPI.login에서 이미 처리됨
   };
 
   const register = async (username: string, email: string, password: string, nickname: string) => {
     const response = await authAPI.register({ username, email, password, nickname });
     setUser(response);
     setIsAuthenticated(true);
+    // localStorage는 authAPI.register에서 이미 처리됨
   };
 
   const logout = () => {

@@ -1,0 +1,125 @@
+.portfolio-hero {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.hero-main-card {
+  background: #1a1a1a;
+  border-radius: 16px;
+  padding: 2.5rem;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-main-card.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-main-card.clickable:hover {
+  background: #2a2a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.hero-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.hero-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.hero-secondary-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hero-secondary-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #f0f0f0;
+}
+
+.hero-secondary-card.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-secondary-card.clickable:hover {
+  border-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.secondary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.secondary-value.profit {
+  color: #16a34a;
+}
+
+.secondary-value.loss {
+  color: #111827;
+}
+
+.secondary-value.neutral {
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .portfolio-hero {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .hero-main-card {
+    padding: 2rem;
+  }
+
+  .hero-value {
+    font-size: 2rem;
+  }
+
+  .hero-secondary-cards {
+    flex-direction: row;
+  }
+
+  .hero-secondary-card {
+    padding: 1.5rem;
+  }
+
+  .secondary-value {
+    font-size: 1.25rem;
+  }
+}
+

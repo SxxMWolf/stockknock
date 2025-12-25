@@ -34,8 +34,18 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Swagger 관련 경로를 먼저 허용 (순서 중요!)
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-ui/index.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/v3/api-docs").permitAll()
+                        .requestMatchers("/swagger-resources/**", "/swagger-resources").permitAll()
+                        .requestMatchers("/webjars/**").permitAll()
+                        .requestMatchers("/configuration/**", "/configuration/ui", "/configuration/security").permitAll()
+                        .requestMatchers("/favicon.ico", "/error").permitAll()
+                        // API 경로 (순서 중요: 구체적인 경로를 먼저!)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/news/**").permitAll() // 뉴스는 공개 API (수집 포함)
+                        .requestMatchers("/api/stocks/**").permitAll() // 주식 정보도 공개
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

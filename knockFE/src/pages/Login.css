@@ -3,18 +3,18 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #FFD8E8 0%, #FF94B2 50%, #F24455 100%);
+  background: #ffffff;
 }
 
 .login-box {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(242, 68, 85, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
   width: 100%;
   max-width: 450px;
   margin: 0 auto;
-  backdrop-filter: blur(10px);
+  border: 1px solid #e5e7eb;
 }
 
 .login-box h2 {
@@ -46,14 +46,14 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #F24455;
-  box-shadow: 0 0 0 3px rgba(242, 68, 85, 0.1);
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
 button {
   width: 100%;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #FF94B2 0%, #F24455 100%);
+  background: #111827;
   color: white;
   border: none;
   border-radius: 5px;
@@ -61,17 +61,31 @@ button {
   cursor: pointer;
   margin-top: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(242, 68, 85, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  outline: none !important;
+}
+
+button:focus,
+button:focus-visible,
+button:active {
+  outline: none !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+  background: #111827 !important;
+  color: white !important;
+  -webkit-tap-highlight-color: transparent !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 button:hover {
-  background: linear-gradient(135deg, #F24455 0%, #E5203A 100%);
-  box-shadow: 0 6px 20px rgba(242, 68, 85, 0.4);
+  background: #1f2937;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+  outline: none !important;
 }
 
 .error {
-  color: red;
+  color: #111827;
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -79,7 +93,7 @@ button:hover {
 .login-box p {
   text-align: center;
   margin-top: 1rem;
-  color: #F24455;
+  color: #111827;
   cursor: pointer;
   transition: color 0.3s ease;
 }

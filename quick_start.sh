@@ -49,6 +49,20 @@ fi
 echo -e "${GREEN}✓ 프론트엔드 준비 완료${NC}"
 cd ..
 
+# FastAPI 의존성 확인
+echo -e "${YELLOW}[4/5] FastAPI 의존성 확인 중...${NC}"
+cd knockAI
+if [ ! -d "venv" ]; then
+    echo "가상 환경 생성 중..."
+    python3 -m venv venv > /dev/null 2>&1
+fi
+if [ ! -f "venv/bin/activate" ]; then
+    echo -e "${RED}✗ FastAPI 가상 환경 생성 실패${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ FastAPI 준비 완료${NC}"
+cd ..
+
 echo ""
 echo -e "${GREEN}=========================================${NC}"
 echo -e "${GREEN}  준비 완료!${NC}"
@@ -59,11 +73,17 @@ echo ""
 echo "1. 백엔드 실행 (터미널 1):"
 echo "   ${YELLOW}cd knockBE && ./gradlew bootRun${NC}"
 echo ""
-echo "2. 프론트엔드 실행 (터미널 2):"
+echo "2. FastAPI 실행 (터미널 2):"
+echo "   ${YELLOW}cd knockAI && source venv/bin/activate && uvicorn app.main:app --reload${NC}"
+echo ""
+echo "3. 프론트엔드 실행 (터미널 3):"
 echo "   ${YELLOW}cd knockFE && npm run dev${NC}"
 echo ""
-echo "3. 브라우저에서 접속:"
+echo "4. 브라우저에서 접속:"
 echo "   ${YELLOW}http://localhost:5173${NC} (또는 Vite가 표시한 포트)"
 echo ""
-echo "자세한 내용은 TEST_GUIDE.md를 참고하세요."
+echo "5. Swagger UI 접속:"
+echo "   ${YELLOW}http://localhost:8080/swagger-ui.html${NC}"
+echo ""
+echo "자세한 내용은 README.md를 참고하세요."
 

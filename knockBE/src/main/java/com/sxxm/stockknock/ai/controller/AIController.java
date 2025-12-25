@@ -29,7 +29,7 @@ public class AIController {
     private AIConversationRepository conversationRepository;
 
     @Autowired
-    private com.sxxm.stockknock.common.service.FastApiService fastApiService;
+    private FastApiService fastApiService;
 
     @PostMapping("/chat")
     public ResponseEntity<AIChatResponse> chat(

@@ -21,7 +21,6 @@ public class NewsAnalysis {
 
     @OneToOne
     @JoinColumn(name = "news_id", insertable = false, updatable = false)
-    @MapsId
     private News news;
 
     @Column(columnDefinition = "TEXT")

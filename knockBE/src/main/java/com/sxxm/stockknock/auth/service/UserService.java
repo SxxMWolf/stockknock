@@ -2,7 +2,9 @@ package com.sxxm.stockknock.auth.service;
 
 import com.sxxm.stockknock.auth.dto.AuthRequest;
 import com.sxxm.stockknock.auth.dto.AuthResponse;
+import com.sxxm.stockknock.auth.dto.PasswordChangeRequest;
 import com.sxxm.stockknock.auth.dto.UserDto;
+import com.sxxm.stockknock.auth.dto.UserUpdateRequest;
 import com.sxxm.stockknock.auth.entity.User;
 import com.sxxm.stockknock.auth.repository.UserRepository;
 import com.sxxm.stockknock.common.util.JwtUtil;
@@ -149,6 +151,92 @@ public class UserService {
         // 이메일 변경
         user.setEmail(newEmail);
         userRepository.save(user);
+    }
+
+    /**
+     * 사용자 정보 수정 (아이디, 닉네임)
+     */
+    public UserDto updateUserProfile(Long userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        // 아이디 변경
+        if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
+            String newUsername = request.getUsername().trim();
+            // 현재 아이디와 다르고, 이미 사용 중인 아이디인지 확인
+            if (!user.getUsername().equals(newUsername) && userRepository.existsByUsername(newUsername)) {
+                throw new RuntimeException("이미 사용 중인 아이디입니다.");
+            }
+            user.setUsername(newUsername);
+        }
+        
+        // 닉네임 변경
+        if (request.getNickname() != null) {
+            user.setNickname(request.getNickname().trim());
+        }
+        
+        user = userRepository.save(user);
+        return UserDto.from(user);
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void changePassword(Long userId, PasswordChangeRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+        }
+        
+        // 새 비밀번호 검증
+        if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
+            throw new RuntimeException("새 비밀번호를 입력해주세요.");
+        }
+        
+        if (request.getNewPassword().length() < 6) {
+            throw new RuntimeException("비밀번호는 최소 6자 이상이어야 합니다.");
+        }
+        
+        // 비밀번호 변경
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    /**
+     * 아이디 변경
+     */
+    public UserDto changeUsername(Long userId, String newUsername, String password) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+        
+        // 새 아이디 검증
+        if (newUsername == null || newUsername.trim().isEmpty()) {
+            throw new RuntimeException("새 아이디를 입력해주세요.");
+        }
+        
+        newUsername = newUsername.trim();
+        
+        // 현재 아이디와 같은지 확인
+        if (user.getUsername().equals(newUsername)) {
+            throw new RuntimeException("현재 아이디와 동일합니다.");
+        }
+        
+        // 이미 사용 중인 아이디인지 확인
+        if (userRepository.existsByUsername(newUsername)) {
+            throw new RuntimeException("이미 사용 중인 아이디입니다.");
+        }
+        
+        user.setUsername(newUsername);
+        user = userRepository.save(user);
+        return UserDto.from(user);
     }
 }
 

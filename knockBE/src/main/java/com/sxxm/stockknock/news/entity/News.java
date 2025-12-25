@@ -20,13 +20,16 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(columnDefinition = "TEXT")
     private String source; // 뉴스 출처
 
+    @Column(columnDefinition = "TEXT")
     private String url;
 
     private LocalDateTime publishedAt;

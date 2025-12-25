@@ -22,16 +22,34 @@ public class FastApiService {
         return fastApiClient.get()
                 .uri("/api/stock/{symbol}/price", symbol)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> {
+                            System.err.println("FastAPI 가격 조회 HTTP 오류: " + symbol + " - " + response.statusCode());
+                            return response.bodyToMono(String.class)
+                                    .flatMap(body -> {
+                                        System.err.println("FastAPI 오류 응답 본문: " + body);
+                                        return Mono.error(new RuntimeException("FastAPI 오류: " + response.statusCode() + " - " + body));
+                                    });
+                        })
                 .bodyToMono(Map.class)
                 .timeout(Duration.ofSeconds(10))
                 .map(response -> {
                     Object price = response.get("price");
                     if (price instanceof Number) {
-                        return BigDecimal.valueOf(((Number) price).doubleValue());
+                        BigDecimal result = BigDecimal.valueOf(((Number) price).doubleValue());
+                        System.out.println("FastAPI 가격 파싱 성공: " + symbol + " = " + result);
+                        return result;
                     } else if (price instanceof String) {
-                        return new BigDecimal((String) price);
+                        BigDecimal result = new BigDecimal((String) price);
+                        System.out.println("FastAPI 가격 파싱 성공 (문자열): " + symbol + " = " + result);
+                        return result;
                     }
+                    System.err.println("FastAPI 응답에 price 필드가 없거나 형식이 잘못됨: " + symbol + " - " + response);
                     return BigDecimal.ZERO;
+                })
+                .doOnError(error -> {
+                    System.err.println("FastAPI 가격 조회 예외: " + symbol + " - " + error.getMessage());
+                    error.printStackTrace();
                 })
                 .onErrorReturn(BigDecimal.ZERO);
     }

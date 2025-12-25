@@ -42,12 +42,24 @@ public class StockPriceService {
             .build();
 
     /**
+     * 한국 주식 심볼을 Yahoo Finance 형식으로 변환 (예: 005930 -> 005930.KS)
+     */
+    private String convertKoreanSymbol(String symbol) {
+        if (symbol != null && symbol.matches("\\d{6}")) {
+            return symbol + ".KS";
+        }
+        return symbol;
+    }
+
+    /**
      * Yahoo Finance API를 통해 주식 가격 업데이트
      * 무료 API, 제한: 초당 2회 요청
      */
     public void updateStockPriceFromYahooFinance(String symbol) {
         try {
-            String url = String.format("/v8/finance/chart/%s?interval=1d&range=1d", symbol);
+            // 한국 주식 심볼 변환
+            String yahooSymbol = convertKoreanSymbol(symbol);
+            String url = String.format("/v8/finance/chart/%s?interval=1d&range=1d", yahooSymbol);
             
             Map<String, Object> response = webClient.get()
                     .uri(url)
@@ -69,24 +81,32 @@ public class StockPriceService {
                                 .orElse(null);
                         
                         if (stock != null) {
-                            Double regularMarketPrice = (Double) meta.get("regularMarketPrice");
-                            Double previousClose = (Double) meta.get("previousClose");
-                            Double dayHigh = (Double) meta.get("regularMarketDayHigh");
-                            Double dayLow = (Double) meta.get("regularMarketDayLow");
-                            Long volume = ((Double) meta.get("regularMarketVolume")).longValue();
+                            // 타입 안전하게 값 추출
+                            Number priceNum = (Number) meta.get("regularMarketPrice");
+                            Number prevCloseNum = (Number) meta.get("previousClose");
+                            Number highNum = (Number) meta.get("regularMarketDayHigh");
+                            Number lowNum = (Number) meta.get("regularMarketDayLow");
+                            Number volumeNum = (Number) meta.get("regularMarketVolume");
                             
-                            if (regularMarketPrice != null) {
+                            if (priceNum != null) {
+                                BigDecimal price = BigDecimal.valueOf(priceNum.doubleValue());
+                                BigDecimal previousClose = prevCloseNum != null ? BigDecimal.valueOf(prevCloseNum.doubleValue()) : null;
+                                BigDecimal dayHigh = highNum != null ? BigDecimal.valueOf(highNum.doubleValue()) : null;
+                                BigDecimal dayLow = lowNum != null ? BigDecimal.valueOf(lowNum.doubleValue()) : null;
+                                Long volume = volumeNum != null ? volumeNum.longValue() : null;
+                                
                                 // StockPriceHistory에 저장
                                 StockPriceHistory priceHistory = StockPriceHistory.builder()
                                         .stock(stock)
-                                        .price(BigDecimal.valueOf(regularMarketPrice))
-                                        .open(previousClose != null ? BigDecimal.valueOf(previousClose) : null)
-                                        .high(dayHigh != null ? BigDecimal.valueOf(dayHigh) : null)
-                                        .low(dayLow != null ? BigDecimal.valueOf(dayLow) : null)
+                                        .price(price)
+                                        .open(previousClose)
+                                        .high(dayHigh)
+                                        .low(dayLow)
                                         .volume(volume)
                                         .timestamp(LocalDateTime.now())
                                         .build();
                                 priceHistoryRepository.save(priceHistory);
+                                System.out.println("Yahoo Finance 가격 저장 성공: " + symbol + " = " + price);
                             }
                         }
                     }

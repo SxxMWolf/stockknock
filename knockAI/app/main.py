@@ -15,7 +15,11 @@ app = FastAPI(
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8080"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",  # Vite 개발 서버
+        "http://localhost:8080",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,6 +43,9 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+
+
 
 
 
