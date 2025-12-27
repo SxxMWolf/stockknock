@@ -2,17 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Portfolio from './pages/Portfolio';
-import PortfolioValueAnalysis from './pages/PortfolioValueAnalysis';
-import PortfolioProfitAnalysis from './pages/PortfolioProfitAnalysis';
-import Watchlist from './pages/Watchlist';
-import Alerts from './pages/Alerts';
-import News from './pages/News';
-import NewsDetail from './pages/NewsDetail';
-import AIChat from './pages/AIChat';
-import MyPage from './pages/MyPage';
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
+import { Portfolio, PortfolioValueAnalysis, PortfolioProfitAnalysis } from './pages/Portfolio';
+import { Watchlist } from './pages/Watchlist';
+import { Alerts } from './pages/Alerts';
+import { News, NewsDetail } from './pages/News';
+import { AIChat } from './pages/AIChat';
+import { MyPage } from './pages/MyPage';
 
 const queryClient = new QueryClient();
 

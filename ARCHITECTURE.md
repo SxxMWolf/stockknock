@@ -1,4 +1,4 @@
-# Spring + FastAPI 하이브리드 구조 제안서
+# StocKKnock - Spring + FastAPI 하이브리드 구조 제안서
 
 ## 📊 현재 상황 분석
 
@@ -102,7 +102,12 @@
 ✅ 포트폴리오 관리
   - 포트폴리오 CRUD
   - 실시간 손익 계산 (FastAPI에서 가격 조회)
-  - AI 포트폴리오 분석 (FastAPI 호출)
+  - **AI 포트폴리오 분석 (캐싱 최적화)**
+    - 포트폴리오 구성 변경 시에만 AI 재분석 (해시 기반 감지)
+    - 사용자별 1개 분석 결과만 유지 (DB 저장)
+    - 불필요한 GPT API 호출 방지로 비용 절감
+    - 백엔드에서 직접 GPT API 호출 (FastAPI 폴백)
+    - 객관적이고 중립적인 리포트 톤 유지
 
 ✅ 관심 종목 관리
   - 관심 종목 추가/삭제/조회
@@ -114,9 +119,15 @@
 ✅ 뉴스 관리
   - 뉴스 조회 (FastAPI에서 수집된 뉴스)
   - 뉴스 AI 분석 (FastAPI 호출)
+  - **오늘의 시장 브리핑**
+    - 하루 1회 GPT로 생성 (스케줄러가 장 시작 전 자동 생성)
+    - 전역 공유 콘텐츠 (모든 사용자 동일 브리핑)
+    - 사용자 관심 종목을 반영한 맞춤형 브리핑
+    - 실패 시에도 기본 메시지 제공 (서비스 안정성)
 
 ✅ AI 채팅
-  - AI 채팅 요청 처리 (FastAPI 호출)
+  - AI 채팅 요청 처리 (백엔드에서 직접 GPT API 호출, FastAPI 폴백)
+  - 질문 의도 파악 개선 (일반 개념 vs 특정 종목 구분)
 
 ✅ API 문서
   - Swagger UI 제공
@@ -125,9 +136,9 @@
 
 #### FastAPI (knockAI) - AI 및 데이터 처리 중심, 내부 서비스
 ```
-✅ AI 서비스 (Spring Boot에서 호출)
-  - AI 채팅 (GPT-4)
-  - 포트폴리오 AI 분석
+✅ AI 서비스 (Spring Boot에서 호출, 폴백용)
+  - AI 채팅 (GPT-4) - 백엔드 직접 호출 실패 시 폴백
+  - 포트폴리오 AI 분석 - 백엔드 직접 호출 실패 시 폴백
   - 뉴스 AI 분석
 
 ✅ 뉴스 처리
@@ -304,9 +315,11 @@ stockknock/
 
 #### Phase 2: AI 서비스 이전 ✅
 1. **AI 서비스** ✅
-   - AI 채팅 → FastAPI (Spring Boot가 내부 호출)
+   - AI 채팅 → 백엔드에서 직접 GPT API 호출 (FastAPI 폴백)
    - 뉴스 분석 → FastAPI (Spring Boot가 내부 호출)
-   - 포트폴리오 분석 → FastAPI (Spring Boot가 내부 호출)
+   - 포트폴리오 분석 → 백엔드에서 직접 GPT API 호출 (FastAPI 폴백)
+   - 질문 의도 파악 개선 (일반 개념 vs 특정 종목 구분)
+   - 프롬프트 개선으로 구체적이고 실용적인 투자 조언 제공
 
 2. **뉴스 서비스** ✅
    - 뉴스 수집 → FastAPI
@@ -334,10 +347,12 @@ stockknock/
 
 ### 🔄 현재 아키텍처
 
-**프론트엔드 → Spring Boot → FastAPI → PostgreSQL**
+**프론트엔드 → Spring Boot → (FastAPI 또는 GPT API 직접 호출) → PostgreSQL**
 
 - 프론트엔드는 오직 Spring Boot API만 호출
-- Spring Boot가 필요 시 FastAPI를 내부적으로 호출
+- Spring Boot가 필요 시 FastAPI를 내부적으로 호출하거나 GPT API를 직접 호출
+- AI 채팅: 백엔드에서 직접 GPT API 호출 (FastAPI 폴백)
+- 포트폴리오 분석: 백엔드에서 직접 GPT API 호출 (FastAPI 폴백)
 - 모든 데이터는 PostgreSQL에 저장
 - 보안, 로깅, 제한은 Spring Boot에서 중앙 관리
 
@@ -425,7 +440,7 @@ stockknock/
 
 ### 📊 주가 API (Stock Price APIs)
 
-StockKnock은 여러 주가 API를 지원하며, 우선순위에 따라 자동으로 폴백(fallback)합니다.
+StocKKnock은 여러 주가 API를 지원하며, 우선순위에 따라 자동으로 폴백(fallback)합니다.
 
 #### 1. Yahoo Finance (기본, 무료) ⭐
 

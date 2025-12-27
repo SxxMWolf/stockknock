@@ -1,5 +1,13 @@
 package com.sxxm.stockknock.alert.entity;
 
+/**
+ * 가격 알림 엔티티
+ * 
+ * 역할:
+ * - 사용자가 설정한 가격 알림 정보 저장
+ * - 목표가, 상한가, 하한가 설정
+ * - 알림 발송 여부 추적
+ */
 import com.sxxm.stockknock.auth.entity.User;
 import com.sxxm.stockknock.stock.entity.Stock;
 import jakarta.persistence.*;

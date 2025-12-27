@@ -41,19 +41,17 @@ async def get_current_price(
         )
     
     # DB에 없으면 FastAPI에서 가격 조회 시도
-    print(f"FastAPI: DB에 가격 이력 없음, 외부 API에서 조회 시도: {symbol}")
+    print(f"[PRICE] DB miss: {symbol}")
     price = await service.get_current_price(symbol)
     
     if not price:
-        print(f"FastAPI: 가격 조회 실패: {symbol}")
-        # 404 대신 0을 반환하여 Spring Boot에서 처리하도록 함
+        # 가격 조회 실패 시 null 반환 (0 대신)
         return StockPriceResponse(
             symbol=symbol,
-            price=Decimal("0"),
+            price=None,  # null 반환
             timestamp=datetime.now()
         )
     
-    print(f"FastAPI: 가격 조회 성공: {symbol} = {price}")
     return StockPriceResponse(
         symbol=symbol,
         price=price,

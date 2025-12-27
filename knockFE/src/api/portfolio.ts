@@ -30,10 +30,18 @@ export const portfolioAPI = {
   },
 
   add: async (stockSymbol: string, quantity: number, avgBuyPrice: number): Promise<PortfolioDto> => {
-    const response = await apiClient.post<PortfolioDto>('/portfolio', null, {
-      params: { stockSymbol, quantity, avgBuyPrice },
-    });
-    return response.data;
+    console.log('portfolioAPI.add called with:', { stockSymbol, quantity, avgBuyPrice });
+    try {
+      const response = await apiClient.post<PortfolioDto>('/portfolio', {
+        stockSymbol,
+        quantity,
+        avgBuyPrice
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Portfolio add error:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
   update: async (portfolioId: number, quantity?: number, avgBuyPrice?: number): Promise<PortfolioDto> => {

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authAPI, type UserProfile, type UserUpdateRequest } from '../api/auth';
-import { useAuth } from '../context/AuthContext';
+import { authAPI, type UserProfile, type UserUpdateRequest } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
 import './MyPage.css';
 
 // 타입 인라인 정의 (Vite 캐시 문제 해결)

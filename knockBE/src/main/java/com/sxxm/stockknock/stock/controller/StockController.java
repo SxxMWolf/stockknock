@@ -1,3 +1,6 @@
+/**
+ * 주식 정보 조회 API. 종목 검색 및 상세 정보 조회.
+ */
 package com.sxxm.stockknock.stock.controller;
 
 import com.sxxm.stockknock.stock.dto.StockDto;

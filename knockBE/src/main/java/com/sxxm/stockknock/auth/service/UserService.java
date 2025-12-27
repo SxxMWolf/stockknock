@@ -1,3 +1,6 @@
+/**
+ * 사용자 계정 관리 비즈니스 로직. 회원가입, 로그인, 프로필 수정, JWT 토큰 생성.
+ */
 package com.sxxm.stockknock.auth.service;
 
 import com.sxxm.stockknock.auth.dto.AuthRequest;

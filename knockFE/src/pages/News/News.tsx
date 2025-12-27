@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { newsAPI } from '../api/news';
+import { newsAPI } from '../../api/news';
 import './News.css';
 
 const News: React.FC = () => {

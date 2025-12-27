@@ -1,5 +1,13 @@
 package com.sxxm.stockknock.ai.entity;
 
+/**
+ * AI 대화 엔티티
+ * 
+ * 역할:
+ * - AI 주식 분석가와의 대화 기록 저장
+ * - 사용자 메시지와 AI 응답 저장
+ * - 대화 맥락 유지를 위한 이력 관리
+ */
 import com.sxxm.stockknock.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

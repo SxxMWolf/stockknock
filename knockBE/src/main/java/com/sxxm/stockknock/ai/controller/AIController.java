@@ -1,3 +1,6 @@
+/**
+ * AI 주식 분석가와의 대화형 질문 응답 API. 최근 5개 대화 기록 기반 문맥 유지.
+ */
 package com.sxxm.stockknock.ai.controller;
 
 import com.sxxm.stockknock.ai.dto.AIChatRequest;
@@ -30,6 +33,9 @@ public class AIController {
 
     @Autowired
     private FastApiService fastApiService;
+    
+    @Autowired
+    private com.sxxm.stockknock.ai.service.AIChatService aiChatService;
 
     @PostMapping("/chat")
     public ResponseEntity<AIChatResponse> chat(
@@ -53,12 +59,37 @@ public class AIController {
                 context.append(conv.getRole()).append(": ").append(conv.getMessage()).append("\n");
             }
 
-            // FastAPI에서 AI 응답 생성
-            String response = fastApiService.chatWithAI(
-                    request.getQuestion(),
-                    userId,
-                    context.toString()
-            ).block();
+            // AI 응답 생성 (비동기 통일 API 사용)
+            String response;
+            try {
+                com.sxxm.stockknock.ai.dto.AIResponseResult result = aiChatService.answerQuestionWithContextAsync(
+                        request.getQuestion(),
+                        context.toString(),
+                        recentConversations.size()
+                ).block(java.time.Duration.ofSeconds(90));
+                
+                if (result != null && result.isSuccess() && result.getContent() != null) {
+                    response = result.getContent();
+                } else {
+                    // GPT API 실패 시 FastAPI로 폴백
+                    String errorMsg = result != null ? result.getErrorMessage() : "알 수 없는 오류";
+                    System.err.println("백엔드 GPT API 실패 (" + (result != null ? result.getFailureType() : "UNKNOWN") + "), FastAPI로 폴백: " + errorMsg);
+                    response = fastApiService.chatWithAI(
+                            request.getQuestion(),
+                            userId,
+                            context.toString()
+                    ).block();
+                }
+            } catch (Exception e) {
+                System.err.println("백엔드 GPT API 예외, FastAPI로 폴백: " + e.getMessage());
+                e.printStackTrace();
+                // FastAPI로 폴백
+                response = fastApiService.chatWithAI(
+                        request.getQuestion(),
+                        userId,
+                        context.toString()
+                ).block();
+            }
 
             // 대화 기록 저장 (사용자 질문)
             AIConversation userMessage = AIConversation.builder()

@@ -1,5 +1,14 @@
 package com.sxxm.stockknock.auth.service;
 
+/**
+ * 이메일 인증 서비스
+ * 
+ * 역할:
+ * - 이메일 변경 시 인증 코드 발송
+ * - 인증 코드 생성 및 검증
+ * - 인증 코드 만료 시간 관리 (10분)
+ * - 만료된 인증 코드 자동 삭제 (스케줄러)
+ */
 import com.sxxm.stockknock.alert.service.NotificationService;
 import com.sxxm.stockknock.auth.entity.EmailVerification;
 import com.sxxm.stockknock.auth.repository.EmailVerificationRepository;
@@ -45,10 +54,10 @@ public class EmailVerificationService {
         emailVerificationRepository.save(verification);
         
         // 이메일 전송
-        String subject = "StockKnock 이메일 인증 코드";
+        String subject = "StocKKnock 이메일 인증 코드";
         String message = String.format(
                 "안녕하세요.\n\n" +
-                "StockKnock 이메일 인증 코드입니다.\n\n" +
+                "StocKKnock 이메일 인증 코드입니다.\n\n" +
                 "인증 코드: %s\n\n" +
                 "이 코드는 10분간 유효합니다.\n" +
                 "본인이 요청한 것이 아니라면 무시하세요.\n\n" +

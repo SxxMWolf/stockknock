@@ -1,10 +1,10 @@
 -- ============================================
--- StockKnock Database Schema
+-- StocKKnock Database Schema
 -- PostgreSQL
 -- ============================================
 -- 
--- 이 스키마는 StockKnock 애플리케이션의 데이터베이스 구조를 정의합니다.
--- 총 12개의 테이블로 구성되어 있습니다.
+-- 이 스키마는 StocKKnock 애플리케이션의 데이터베이스 구조를 정의합니다.
+-- 총 14개의 테이블로 구성되어 있습니다.
 -- 
 -- 실행 방법:
 -- psql -U sxxm -d stockknockdb -f schema.sql
@@ -93,6 +93,21 @@ CREATE TABLE IF NOT EXISTS portfolio_item (
 
 CREATE INDEX idx_portfolio_stock ON portfolio_item(portfolio_id, stock_symbol);
 CREATE INDEX idx_portfolio_item_stock ON portfolio_item(stock_symbol);
+
+-- ============================================
+-- 5-1. portfolio_analysis (포트폴리오 AI 분석 결과)
+-- ============================================
+CREATE TABLE IF NOT EXISTS portfolio_analysis (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    portfolio_hash VARCHAR(64) NOT NULL,
+    analysis_content TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'SUCCESS',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_portfolio_analysis_user ON portfolio_analysis(user_id);
+CREATE INDEX idx_portfolio_analysis_hash ON portfolio_analysis(portfolio_hash);
 
 -- ============================================
 -- 6. watchlist (관심 종목)
@@ -187,6 +202,20 @@ CREATE TABLE IF NOT EXISTS ai_conversation (
 CREATE INDEX idx_ai_conversation_user_time ON ai_conversation(user_id, created_at DESC);
 
 -- ============================================
+-- 13. market_briefing (시장 브리핑 캐시)
+-- ============================================
+CREATE TABLE IF NOT EXISTS market_briefing (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, date)
+);
+
+CREATE INDEX idx_market_briefing_user_date ON market_briefing(user_id, date DESC);
+
+-- ============================================
 -- 12. email_verification (이메일 인증 코드)
 -- ============================================
 CREATE TABLE IF NOT EXISTS email_verification (
@@ -204,12 +233,13 @@ CREATE INDEX idx_email_verification_code ON email_verification(verification_code
 -- ============================================
 -- 스키마 생성 완료
 -- ============================================
--- 총 12개 테이블이 생성되었습니다:
+-- 총 14개 테이블이 생성되었습니다:
 -- 1. users
 -- 2. stocks
 -- 3. stock_price_history
 -- 4. portfolio
 -- 5. portfolio_item
+-- 5-1. portfolio_analysis (포트폴리오 AI 분석 결과 캐시)
 -- 6. watchlist
 -- 7. price_alert
 -- 8. news
@@ -217,4 +247,5 @@ CREATE INDEX idx_email_verification_code ON email_verification(verification_code
 -- 10. news_stock_relation
 -- 11. ai_conversation
 -- 12. email_verification
+-- 13. market_briefing
 -- ============================================

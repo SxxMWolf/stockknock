@@ -1,6 +1,6 @@
-# StockKnock AI Service (FastAPI)
+# StocKKnock AI Service (FastAPI)
 
-StockKnock의 AI 및 데이터 처리 서비스를 담당하는 FastAPI 애플리케이션입니다.
+StocKKnock의 AI 및 데이터 처리 서비스를 담당하는 FastAPI 애플리케이션입니다.
 
 ## 주요 기능
 
@@ -85,6 +85,10 @@ knockAI/
 ├── requirements.txt
 └── README.md
 ```
+
+
+
+
 
 
 

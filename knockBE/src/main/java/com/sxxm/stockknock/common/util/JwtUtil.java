@@ -1,3 +1,6 @@
+/**
+ * JWT 토큰 생성 및 검증. 사용자 정보 추출, 만료 시간 관리, Secret 키 검증.
+ */
 package com.sxxm.stockknock.common.util;
 
 import io.jsonwebtoken.Claims;

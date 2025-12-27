@@ -1,5 +1,13 @@
 package com.sxxm.stockknock.stock.entity;
 
+/**
+ * 주식 가격 이력 엔티티
+ * 
+ * 역할:
+ * - 주식 가격의 시계열 데이터 저장
+ * - 종목별, 시간별 가격 기록
+ * - 현재가 조회 시 캐시로 활용
+ */
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

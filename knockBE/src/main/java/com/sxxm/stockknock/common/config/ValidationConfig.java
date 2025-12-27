@@ -13,7 +13,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Validation 에러 처리
+ * Validation 에러 처리 설정
+ * 
+ * 역할:
+ * - 요청 데이터 검증 실패 시 에러 응답 처리
+ * - MethodArgumentNotValidException 처리 (DTO 검증 실패)
+ * - ConstraintViolationException 처리 (제약 조건 위반)
+ * - 검증 에러를 사용자 친화적인 형식으로 변환
  */
 @Hidden
 @RestControllerAdvice

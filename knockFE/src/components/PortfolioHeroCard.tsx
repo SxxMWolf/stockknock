@@ -30,7 +30,7 @@ const PortfolioHeroCard: React.FC<PortfolioHeroCardProps> = ({
           className="hero-secondary-card clickable"
           onClick={() => navigate('/portfolio/analysis/profit')}
         >
-          <div className="secondary-label">오늘 손익</div>
+          <div className="secondary-label">전체 손익</div>
           <div className={`secondary-value ${isProfit ? 'profit' : 'loss'}`}>
             {isProfit ? '+' : ''}{totalProfitLoss.toLocaleString()}원
           </div>

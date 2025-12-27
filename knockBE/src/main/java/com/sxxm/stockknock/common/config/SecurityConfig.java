@@ -1,3 +1,6 @@
+/**
+ * Spring Security 설정. 보안 필터 체인, JWT 인증 필터, CORS, 공개 API 경로 설정.
+ */
 package com.sxxm.stockknock.common.config;
 
 import com.sxxm.stockknock.common.security.JwtAuthenticationFilter;

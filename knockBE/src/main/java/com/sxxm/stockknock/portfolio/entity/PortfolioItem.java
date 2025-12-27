@@ -1,3 +1,6 @@
+/**
+ * 포트폴리오에 포함된 종목 정보 저장. 보유 수량, 평균 매입가 저장.
+ */
 package com.sxxm.stockknock.portfolio.entity;
 
 import com.sxxm.stockknock.stock.entity.Stock;
@@ -25,18 +28,20 @@ public class PortfolioItem {
     @JoinColumn(name = "portfolio_id", nullable = false)
     private Portfolio portfolio;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stock_symbol", nullable = false, referencedColumnName = "symbol")
     private Stock stock;
 
-    @Column(nullable = false, precision = 18, scale = 4)
+    @Column(name = "quantity", nullable = false, precision = 18, scale = 4)
     private BigDecimal quantity; // 보유 수량
 
-    @Column(nullable = false, precision = 18, scale = 4)
+    @Column(name = "avg_buy_price", nullable = false, precision = 18, scale = 4)
     private BigDecimal avgBuyPrice; // 평균 매입 단가
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

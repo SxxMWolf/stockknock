@@ -1,5 +1,13 @@
 package com.sxxm.stockknock.auth.entity;
 
+/**
+ * 이메일 인증 엔티티
+ * 
+ * 역할:
+ * - 이메일 변경 시 인증 코드 저장
+ * - 인증 코드 만료 시간 관리
+ * - 이메일과 인증 코드 인덱스로 빠른 조회
+ */
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

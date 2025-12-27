@@ -7,7 +7,7 @@ from app.database import engine, Base
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="StockKnock AI Service",
+    title="StocKKnock AI Service",
     description="FastAPI 기반 AI 및 데이터 처리 서비스",
     version="1.0.0"
 )
@@ -34,7 +34,7 @@ app.include_router(news.router)
 @app.get("/")
 async def root():
     return {
-        "message": "StockKnock AI Service",
+        "message": "StocKKnock AI Service",
         "version": "1.0.0",
         "status": "running"
     }

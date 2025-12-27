@@ -1,5 +1,12 @@
 package com.sxxm.stockknock.auth.dto;
 
+/**
+ * 인증 응답 DTO
+ * 
+ * 역할:
+ * - 로그인 성공 시 반환되는 데이터
+ * - JWT 토큰 및 사용자 정보 포함
+ */
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

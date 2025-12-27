@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { portfolioAPI } from '../api/portfolio';
-import { parseMarkdown } from '../utils/markdownParser';
+import { portfolioAPI } from '../../api/portfolio';
+import { parseMarkdown } from '../../utils/markdownParser';
 import './PortfolioValueAnalysis.css';
 
 const PortfolioValueAnalysis: React.FC = () => {

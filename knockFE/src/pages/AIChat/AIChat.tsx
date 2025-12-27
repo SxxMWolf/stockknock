@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { aiAPI } from '../api/ai';
-import { useAuth } from '../context/AuthContext';
-import { parseMarkdown } from '../utils/markdownParser';
+import { aiAPI } from '../../api/ai';
+import { useAuth } from '../../context/AuthContext';
+import { parseMarkdown } from '../../utils/markdownParser';
 import './AIChat.css';
 
 const AIChat: React.FC = () => {
@@ -35,8 +35,8 @@ const AIChat: React.FC = () => {
 
   useEffect(() => {
     if (textareaRef.current) {
-      // 7줄 기준 max-height 계산: line-height(1.5) * font-size(16px) * 7줄 + padding(2rem) + border(4px)
-      const maxHeight = 1.5 * 16 * 7 + 32 + 4; // 204px
+      // 7줄 기준 max-height 계산: line-height(1.5) * font-size(16px) * 7줄 + padding(1.5rem) + border(4px)
+      const maxHeight = 1.5 * 16 * 7 + 24 + 4; // 196px (padding 감소)
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, maxHeight)}px`;
     }
@@ -61,6 +61,17 @@ const AIChat: React.FC = () => {
   const handleExampleClick = (example: string) => {
     setQuestion(example);
     textareaRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Shift + Enter: 줄바꿈
+    // Enter만: 메시지 전송
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (question.trim() && !mutation.isPending && user?.userId) {
+        handleSubmit(e as any);
+      }
+    }
   };
 
   return (
@@ -148,6 +159,7 @@ const AIChat: React.FC = () => {
                 ref={textareaRef}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="궁금한 종목이나 시장 이슈를 입력하세요"
                 disabled={mutation.isPending}
                 rows={1}

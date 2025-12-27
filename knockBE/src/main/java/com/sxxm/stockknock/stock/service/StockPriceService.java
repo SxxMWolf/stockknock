@@ -16,8 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 외부 API를 통해 주식 가격을 업데이트하는 서비스
- * Yahoo Finance, Alpha Vantage, Twelve Data 등 지원
+ * 주식 가격 업데이트 서비스
+ * 
+ * 역할:
+ * - 외부 API를 통한 주식 가격 업데이트
+ * - Yahoo Finance, Alpha Vantage, Twelve Data 지원
+ * - 가격 이력을 DB에 저장 (StockPriceHistory)
+ * - 모든 종목 가격 일괄 업데이트
+ * - 스케줄러에서 호출되어 장 종료 후 가격 갱신
  */
 @Service
 public class StockPriceService {

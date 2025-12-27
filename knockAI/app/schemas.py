@@ -6,7 +6,7 @@ from decimal import Decimal
 
 class StockPriceResponse(BaseModel):
     symbol: str
-    price: Decimal
+    price: Optional[Decimal] = None  # 가격 조회 실패 시 null 허용
     open: Optional[Decimal] = None
     high: Optional[Decimal] = None
     low: Optional[Decimal] = None

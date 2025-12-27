@@ -17,7 +17,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 가격 알림을 체크하고 트리거하는 스케줄러
+ * 가격 알림 체크 스케줄러
+ * 
+ * 역할:
+ * - 주기적으로 모든 가격 알림을 체크
+ * - 목표가에 도달한 알림을 찾아서 알림 발송
+ * - 알림 발송 후 알림 상태 업데이트 또는 삭제
  */
 @Component
 public class PriceAlertScheduler {

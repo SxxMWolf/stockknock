@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { alertsAPI, type CreateAlertRequest } from '../api/alerts';
-import { stockAPI } from '../api/stock';
-import type { StockDto } from '../api/stock';
+import { alertsAPI, type CreateAlertRequest } from '../../api/alerts';
+import { stockAPI } from '../../api/stock';
+import type { StockDto } from '../../api/stock';
 import './Alerts.css';
 
 const Alerts: React.FC = () => {

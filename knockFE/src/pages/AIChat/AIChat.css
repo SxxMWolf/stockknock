@@ -437,9 +437,9 @@
 }
 
 .textarea-scroll {
-  max-height: calc(1.5em * 7 + 2rem + 4px);
+  max-height: calc(1.5em * 7 + 1.5rem + 4px);
   overflow-y: auto;
-  padding-right: 3.5rem;
+  padding-right: 2.75rem;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
   background: white;
@@ -470,11 +470,11 @@
 
 .chat-input textarea {
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 1rem;
   border: none;
   border-radius: 0;
   font-size: 1rem;
-  min-height: 56px;
+  min-height: 44px;
   line-height: 1.5;
   resize: none;
   font-family: inherit;
@@ -509,10 +509,10 @@
 
 .chat-input .send-btn {
   position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 40px;
-  height: 40px;
+  right: 6px;
+  bottom: 6px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: none;
   background: #e0e0e0;
@@ -563,7 +563,7 @@
 }
 
 .send-icon {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: bold;
   line-height: 1;
   display: flex;
@@ -638,22 +638,22 @@
   }
 
   .textarea-scroll {
-    max-height: calc(1.5em * 7 + 2rem + 4px);
-    padding-right: 3.25rem;
+    max-height: calc(1.5em * 7 + 1.5rem + 4px);
+    padding-right: 2.5rem;
   }
 
   .chat-input textarea {
-    padding: 1rem 1rem;
+    padding: 0.75rem 1rem;
   }
 
   .chat-input .send-btn {
-    width: 36px;
-    height: 36px;
-    right: 6px;
-    bottom: 6px;
+    width: 28px;
+    height: 28px;
+    right: 5px;
+    bottom: 5px;
   }
 
   .send-icon {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
   }
 }

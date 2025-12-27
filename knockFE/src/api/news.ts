@@ -38,5 +38,10 @@ export const newsAPI = {
     const response = await apiClient.get<{ summary: string }>('/news/today-summary');
     return response.data.summary;
   },
+
+  getMarketBriefing: async (): Promise<string> => {
+    const response = await apiClient.get<{ summary: string }>('/news/market-briefing');
+    return response.data.summary;
+  },
 };
 

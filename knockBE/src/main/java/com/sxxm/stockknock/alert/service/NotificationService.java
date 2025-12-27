@@ -9,7 +9,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 /**
- * 알림 발송 서비스 (이메일, SMS, 푸시 알림)
+ * 알림 발송 서비스
+ * 
+ * 역할:
+ * - 가격 알림 발송 (이메일)
+ * - 주가가 목표가에 도달했을 때 사용자에게 알림
+ * - 이메일 발송 기능 (JavaMailSender 사용)
+ * - 알림 발송 실패 시 로그 기록
  */
 @Service
 public class NotificationService {

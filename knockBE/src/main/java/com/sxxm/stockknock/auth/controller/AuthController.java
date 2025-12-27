@@ -1,3 +1,6 @@
+/**
+ * 사용자 인증 및 계정 관리 API. 회원가입, 로그인, 프로필 수정 등.
+ */
 package com.sxxm.stockknock.auth.controller;
 
 import com.sxxm.stockknock.auth.dto.AuthRequest;

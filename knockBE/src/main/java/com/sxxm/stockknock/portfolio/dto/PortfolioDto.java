@@ -1,5 +1,12 @@
 package com.sxxm.stockknock.portfolio.dto;
 
+/**
+ * 포트폴리오 DTO
+ * 
+ * 역할:
+ * - 포트폴리오 항목 정보를 프론트엔드로 전달
+ * - 종목 정보, 보유 수량, 평균가, 현재가, 손익 정보 포함
+ */
 import com.sxxm.stockknock.stock.dto.StockDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

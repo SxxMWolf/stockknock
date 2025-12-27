@@ -6,56 +6,48 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
 /**
- * 주식 가격을 주기적으로 업데이트하는 스케줄러
- * - 장중(09:00~15:30): 5~10분 주기
- * - 장 마감 후: 30~60분 주기
- * - 주말/공휴일: 갱신 안 함
+ * 주식 가격 업데이트 스케줄러
+ * 
+ * 역할:
+ * - 장 종료 후 주식 가격 일괄 업데이트 (하루 1회)
+ * - 장중(09:00~15:30)에는 가격 조회 비활성화 (캐시만 사용)
+ * - 평일만 실행 (주말/공휴일 제외)
+ * - 16시~23시 매 시간 정각에 체크하되, 오늘 이미 업데이트했으면 스킵
  */
 @Component
 public class StockPriceScheduler {
 
     @Autowired
     private StockPriceService stockPriceService;
+    
+    // 마지막 업데이트 날짜 (하루 1회 체크용)
+    private LocalDate lastUpdateDate = null;
 
     /**
-     * 장중 주식 가격 업데이트 (09:00~15:30, 5~10분 주기)
-     * 실제로는 7분마다 실행 (5~10분의 중간값)
+     * 장 종료 후 주식 가격 업데이트 (15:30 이후, 하루 1회)
+     * 매 시간마다 체크하되, 오늘 이미 업데이트했으면 스킵
      */
-    @Scheduled(cron = "0 */7 9-15 * * MON-FRI")
-    public void updateStockPricesDuringMarketHours() {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        LocalTime currentTime = now.toLocalTime();
-        
-        // 장중 시간 체크 (09:00~15:30)
-        if (currentTime.isAfter(LocalTime.of(9, 0)) && 
-            currentTime.isBefore(LocalTime.of(15, 31))) {
-            System.out.println("장중 주식 가격 업데이트 시작... (" + now + ")");
-            stockPriceService.updateAllStockPrices();
-            System.out.println("장중 주식 가격 업데이트 완료");
-        }
-    }
-
-    /**
-     * 장 마감 후 주식 가격 업데이트 (15:30 이후, 30~60분 주기)
-     * 실제로는 45분마다 실행 (30~60분의 중간값)
-     */
-    @Scheduled(cron = "0 */45 * * * MON-FRI")
+    @Scheduled(cron = "0 0 16-23 * * MON-FRI")  // 16시~23시 매 시간 정각에 체크
     public void updateStockPricesAfterMarketClose() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDate today = now.toLocalDate();
         LocalTime currentTime = now.toLocalTime();
         DayOfWeek dayOfWeek = now.getDayOfWeek();
         
-        // 평일이고 장 마감 후인 경우만 업데이트
+        // 평일이고 장 마감 후(15:30 이후)이고, 오늘 아직 업데이트하지 않았으면 실행
         if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY &&
-            currentTime.isAfter(LocalTime.of(15, 30))) {
-            System.out.println("장 마감 후 주식 가격 업데이트 시작... (" + now + ")");
+            currentTime.isAfter(LocalTime.of(15, 30)) &&
+            (lastUpdateDate == null || !lastUpdateDate.equals(today))) {
+            System.out.println("[PRICE] 장 종료 후 가격 갱신 시작... (" + now + ")");
             stockPriceService.updateAllStockPrices();
-            System.out.println("장 마감 후 주식 가격 업데이트 완료");
+            lastUpdateDate = today;  // 오늘 날짜로 업데이트
+            System.out.println("[PRICE] 장 종료 후 가격 갱신 완료 (하루 1회)");
         }
     }
 }

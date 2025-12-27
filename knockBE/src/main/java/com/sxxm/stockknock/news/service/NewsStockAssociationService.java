@@ -13,8 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 뉴스와 종목을 연관시키는 서비스
- * AI를 활용하여 뉴스 내용에서 등장하는 종목을 자동으로 추출
+ * 뉴스-종목 연관 서비스
+ * 
+ * 역할:
+ * - 뉴스 내용에서 등장하는 종목을 자동으로 추출
+ * - AI를 활용하여 뉴스와 종목을 연관시킴
+ * - NewsStockRelation 엔티티를 통해 뉴스-종목 관계 저장
  */
 @Service
 public class NewsStockAssociationService {

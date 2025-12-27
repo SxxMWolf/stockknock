@@ -1,5 +1,14 @@
 package com.sxxm.stockknock.common.security;
 
+/**
+ * JWT 인증 필터
+ * 
+ * 역할:
+ * - HTTP 요청마다 JWT 토큰 검증
+ * - 유효한 토큰이면 SecurityContext에 인증 정보 설정
+ * - 공개 API 경로는 필터 건너뛰기 (회원가입, 로그인, Swagger)
+ * - 인증 실패 시 401 Unauthorized 반환
+ */
 import com.sxxm.stockknock.common.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             path.startsWith("/swagger-resources") ||
             path.startsWith("/webjars") ||
             path.startsWith("/configuration") ||
-            path.startsWith("/api/news") || // 뉴스는 공개 API
+            path.startsWith("/api/news/recent") || // 뉴스 조회는 공개 API
+            path.startsWith("/api/news/") && path.matches("/api/news/\\d+") || // 뉴스 상세 조회는 공개
             path.startsWith("/api/auth") || // 인증 API는 공개
             path.startsWith("/api/stocks") || // 주식 정보도 공개
             path.equals("/favicon.ico")) {
@@ -39,6 +49,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
+        
+        // /api/news/market-briefing과 /api/news/today-summary는 인증 필요 (필터 통과)
         
         System.out.println("JWT 필터 처리 중: " + path);
         

@@ -1,3 +1,6 @@
+/**
+ * 주가 알림 설정 및 관리 API. 조회, 생성, 수정, 삭제.
+ */
 package com.sxxm.stockknock.alert.controller;
 
 import com.sxxm.stockknock.alert.entity.PriceAlert;
@@ -30,13 +33,19 @@ public class PriceAlertController {
     private JwtUtil jwtUtil;
 
     @GetMapping
-    public ResponseEntity<List<PriceAlert>> getAlerts(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getAlerts(@RequestHeader("Authorization") String token) {
         try {
+            if (token == null || token.length() < 7) {
+                System.err.println("Invalid token format: " + token);
+                return ResponseEntity.status(401).build();
+            }
             Long userId = jwtUtil.getUserIdFromToken(token.substring(7));
             List<PriceAlert> alerts = priceAlertRepository.findByUserId(userId);
             return ResponseEntity.ok(alerts);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("알림 조회 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 

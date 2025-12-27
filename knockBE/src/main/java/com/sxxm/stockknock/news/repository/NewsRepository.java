@@ -1,5 +1,14 @@
 package com.sxxm.stockknock.news.repository;
 
+/**
+ * 뉴스 레포지토리
+ * 
+ * 역할:
+ * - 뉴스 엔티티의 데이터베이스 접근
+ * - 기간별 뉴스 조회
+ * - 제목/내용으로 뉴스 검색
+ * - 오래된 뉴스 삭제
+ */
 import com.sxxm.stockknock.news.entity.News;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

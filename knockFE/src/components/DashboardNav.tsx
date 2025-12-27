@@ -42,7 +42,7 @@ const DashboardNav: React.FC = () => {
     <header className="dashboard-header">
       <div className="header-left">
         <div className="logo-section">
-          <h1 className="logo">StockKnock</h1>
+          <h1 className="logo">StocKKnock</h1>
           {isDevUser && <span className="env-badge">DEV</span>}
         </div>
       </div>

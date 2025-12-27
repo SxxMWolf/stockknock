@@ -1,4 +1,4 @@
-# StockKnock - AI 기반 통합 주식 분석 플랫폼
+# StocKKnock - AI 기반 통합 주식 분석 플랫폼
 
 국내·해외 주식 투자자를 위한 AI 기반 주식 분석 플랫폼입니다. 실시간 주가 정보, AI 뉴스 분석, 포트폴리오 관리, 가격 알림 등 종합적인 투자 도구를 제공합니다.
 
@@ -26,25 +26,24 @@
 - **시장 개장 시간에만 자동 갱신** (평일 09:00-15:30, 매 1분마다)
 - 비용 최적화를 위한 스마트 업데이트 스케줄링
 
-### 🤖 AI 뉴스 분석
-- NewsAPI를 통한 뉴스 자동 수집 (매 2시간)
-- **비용 최적화**: 주요 20개 뉴스만 AI 분석
-- **골든 뉴스 우선 분석**: 주가 영향 높은 뉴스 자동 선별
-- 중복 뉴스 자동 제거 (제목 유사도 기반)
-- GPT-4를 활용한 뉴스 요약 및 주가 영향 분석
-- 감정 분석 (긍정/부정/중립)
-- 영향 점수 산출 (1-10점)
-- AI 기반 뉴스-종목 자동 연관 분석
+### 📰 오늘의 시장 브리핑
+- **GPT 기반 일일 시장 요약** (하루 1회 생성)
+- 사용자 관심 종목을 반영한 맞춤형 브리핑
+- 장 시작 전 자동 생성 (스케줄러)
+- 실패 시에도 기본 메시지 제공 (서비스 안정성)
+- 전역 공유 콘텐츠 (모든 사용자 동일 브리핑)
 
 ### 📊 포트폴리오 관리
 - 보유 종목 관리 (추가/수정/삭제)
 - 실시간 손익 계산 (손익금액, 손익률)
 - 총 평가액 및 총 손익 추적
-- AI 기반 포트폴리오 종합 분석
-  - 포트폴리오 건강도 평가
-  - 리스크 분석
-  - 종목 간 상관관계 분석
-  - 리밸런싱 제안
+- **AI 기반 포트폴리오 종합 분석 (캐싱 최적화)**
+  - 포트폴리오 구성 변경 시에만 AI 재분석 (해시 기반 감지)
+  - 사용자별 1개 분석 결과만 유지 (DB 저장)
+  - 포트폴리오 요약 (총 평가액, 총 손익, 수익률)
+  - 핵심 해석 (수익 상태, 리스크 요인)
+  - 투자자가 고려해볼 선택지 (객관적, 중립적 톤)
+  - 불필요한 GPT API 호출 방지로 비용 절감
 
 ### 🔔 가격 알림
 - 목표가 도달 알림
@@ -56,6 +55,8 @@
 ### 💬 AI 채팅
 - 문맥을 유지하는 대화형 AI 애널리스트
 - 최근 5개 대화 기록 기반 문맥 유지
+- 질문 의도 정확히 파악하여 직접적인 답변 제공
+- 일반 개념 질문과 특정 종목 질문 구분 처리
 - 종목 전망, 산업 동향, 리스크 분석 등 다양한 질문 지원
 - 대화 기록 자동 저장
 
@@ -93,6 +94,10 @@
 - **ORM**: Spring Data JPA (Hibernate)
 - **보안**: Spring Security + JWT
 - **AI**: OpenAI GPT-4 API (gpt-4o-mini 기본값)
+  - 백엔드에서 직접 GPT API 호출 (OpenAiService)
+  - FastAPI 폴백 지원
+  - **주의**: Jackson 2.x 버전 사용 (OpenAiService 라이브러리 호환성)
+  - `build.gradle`에서 Jackson 2.17.2 강제 사용
 - **스케줄러**: Spring Scheduling
 - **HTTP 클라이언트**: Spring WebFlux (WebClient)
 - **이메일**: Spring Mail (Gmail SMTP)
@@ -822,7 +827,7 @@ SKJWT_SECRET=<생성된-64-byte-이상-키>
 
 ### 📊 주가 API (Stock Price APIs)
 
-StockKnock은 여러 주가 API를 지원하며, 우선순위에 따라 자동으로 폴백(fallback)합니다.
+StocKKnock은 여러 주가 API를 지원하며, 우선순위에 따라 자동으로 폴백(fallback)합니다.
 
 #### 1. Yahoo Finance (기본, 무료) ⭐
 
@@ -1267,20 +1272,49 @@ Yahoo Finance (기본)
   - **Response** (200 OK): 삭제 성공
 
 #### AI 포트폴리오 분석
-- **`GET /api/portfolio/analysis`**
-  - **설명**: AI 기반 포트폴리오 종합 분석 (건강도, 리스크, 리밸런싱 제안 등)
+- **`GET /api/portfolio/analysis?forceRefresh={boolean}`**
+  - **설명**: AI 기반 포트폴리오 종합 분석 (캐싱 최적화)
+  - **인증**: 필요 (JWT 토큰)
+  - **Query Parameter**: `forceRefresh` (기본값: `false`, 강제 재분석 여부)
+  - **Response** (200 OK):
+    ```json
+    {
+      "totalValue": 1755000,
+      "totalProfitLoss": 705000,
+      "totalProfitLossRate": 40.17,
+      "analysis": "포트폴리오 해석 (1~2문장)\n\n핵심 리스크 또는 구조적 특징 (1~2문장)\n\n- 투자자가 고려해볼 선택지 1\n- 투자자가 고려해볼 선택지 2\n- 투자자가 고려해볼 선택지 3",
+      "investmentStyle": "BALANCED"
+    }
+    ```
+  - **캐싱 로직**:
+    - 포트폴리오 구성 변경 시에만 AI 재분석 (해시 기반 감지)
+    - 동일 구성이면 DB에 저장된 분석 결과 반환
+    - `forceRefresh=true`로 강제 재분석 가능
+  - **분석 내용**:
+    - 포트폴리오 해석 (1~2문장)
+    - 핵심 리스크 또는 구조적 특징 (1~2문장)
+    - 투자자가 고려해볼 선택지 (불릿 2~3개)
+    - 객관적이고 중립적인 리포트 톤 유지
+
+### 뉴스 (News)
+
+#### 오늘의 시장 브리핑
+- **`GET /api/news/market-briefing`**
+  - **설명**: 오늘의 시장 브리핑 조회 (하루 1회 GPT로 생성, 전역 공유)
   - **인증**: 필요 (JWT 토큰)
   - **Response** (200 OK):
     ```json
     {
-      "healthScore": 8.5,
-      "riskAnalysis": "...",
-      "correlationAnalysis": "...",
-      "rebalancingSuggestions": "..."
+      "content": "오늘의 주요 시장 이슈:\n1. ...\n2. ...\n3. ...",
+      "status": "SUCCESS",
+      "date": "2024-01-15"
     }
     ```
-
-### 뉴스 (News)
+  - **특징**:
+    - 하루 1회만 GPT로 생성 (스케줄러가 장 시작 전 자동 생성)
+    - 모든 사용자가 동일한 브리핑 조회 (전역 콘텐츠)
+    - 실패 시에도 기본 메시지 제공 (서비스 안정성)
+    - 사용자 관심 종목을 반영한 맞춤형 브리핑
 
 #### 최근 뉴스 조회
 - **`GET /api/news/recent?days={days}`**
@@ -1666,6 +1700,10 @@ boolean isVerified = emailVerificationService.isEmailVerified("newemail@example.
 1. `OPENAI_API_KEY` 환경 변수 확인
 2. OpenAI API 사용량 확인
 3. API 키 유효성 확인
+4. **Jackson 버전 충돌 문제**:
+   - `NoSuchFieldError: SNAKE_CASE` 에러 발생 시
+   - `build.gradle`에서 Jackson 2.x 버전 강제 사용 확인
+   - `./gradlew clean build` 후 재시작
 
 ### 이메일 변경이 작동하지 않음
 
@@ -1739,4 +1777,4 @@ boolean isVerified = emailVerificationService.isEmailVerified("newemail@example.
 
 ---
 
-**Made with ❤️ for stock investors**
+**Made with ❤️ for stock investors - StocKKnock**

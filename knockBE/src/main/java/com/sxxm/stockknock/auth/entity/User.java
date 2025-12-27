@@ -1,3 +1,6 @@
+/**
+ * 사용자 계정 정보 저장. 포트폴리오, 관심 종목, 가격 알림과의 연관관계.
+ */
 package com.sxxm.stockknock.auth.entity;
 
 import com.sxxm.stockknock.portfolio.entity.Portfolio;

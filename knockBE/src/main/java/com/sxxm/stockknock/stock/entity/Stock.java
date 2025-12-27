@@ -1,3 +1,6 @@
+/**
+ * 주식 기본 정보 저장. stocks 테이블과 매핑, symbol을 Primary Key로 사용.
+ */
 package com.sxxm.stockknock.stock.entity;
 
 import jakarta.persistence.*;

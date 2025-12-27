@@ -1,5 +1,14 @@
 package com.sxxm.stockknock.common.service;
 
+/**
+ * FastAPI 서비스 클라이언트
+ * 
+ * 역할:
+ * - Python FastAPI 서버와의 통신 담당
+ * - WebClient를 사용한 비동기 HTTP 요청
+ * - 주가 조회, AI 채팅, 뉴스 분석, 포트폴리오 분석 API 호출
+ * - 타임아웃 및 에러 처리
+ */
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,34 +33,28 @@ public class FastApiService {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> {
-                            System.err.println("FastAPI 가격 조회 HTTP 오류: " + symbol + " - " + response.statusCode());
+                            // HTTP 오류는 onErrorReturn에서 처리
                             return response.bodyToMono(String.class)
-                                    .flatMap(body -> {
-                                        System.err.println("FastAPI 오류 응답 본문: " + body);
-                                        return Mono.error(new RuntimeException("FastAPI 오류: " + response.statusCode() + " - " + body));
-                                    });
+                                    .flatMap(body -> Mono.error(new RuntimeException("FastAPI 오류: " + response.statusCode())));
                         })
                 .bodyToMono(Map.class)
                 .timeout(Duration.ofSeconds(10))
                 .map(response -> {
                     Object price = response.get("price");
-                    if (price instanceof Number) {
-                        BigDecimal result = BigDecimal.valueOf(((Number) price).doubleValue());
-                        System.out.println("FastAPI 가격 파싱 성공: " + symbol + " = " + result);
-                        return result;
-                    } else if (price instanceof String) {
-                        BigDecimal result = new BigDecimal((String) price);
-                        System.out.println("FastAPI 가격 파싱 성공 (문자열): " + symbol + " = " + result);
-                        return result;
+                    if (price == null) {
+                        return null;  // null 반환
                     }
-                    System.err.println("FastAPI 응답에 price 필드가 없거나 형식이 잘못됨: " + symbol + " - " + response);
-                    return BigDecimal.ZERO;
+                    if (price instanceof Number) {
+                        return BigDecimal.valueOf(((Number) price).doubleValue());
+                    } else if (price instanceof String) {
+                        return new BigDecimal((String) price);
+                    }
+                    return null;  // null 반환 (BigDecimal.ZERO 대신)
                 })
                 .doOnError(error -> {
-                    System.err.println("FastAPI 가격 조회 예외: " + symbol + " - " + error.getMessage());
-                    error.printStackTrace();
+                    // 에러 로그는 상위에서 처리
                 })
-                .onErrorReturn(BigDecimal.ZERO);
+                .onErrorReturn(null);  // null 반환 (BigDecimal.ZERO 대신)
     }
 
     /**
@@ -110,10 +113,23 @@ public class FastApiService {
                 .uri("/api/ai/analyze-portfolio")
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> {
+                            System.err.println("FastAPI 포트폴리오 분석 HTTP 오류: " + response.statusCode());
+                            return response.bodyToMono(String.class)
+                                    .flatMap(body -> {
+                                        System.err.println("FastAPI 오류 응답 본문: " + body);
+                                        return Mono.error(new RuntimeException("FastAPI 오류: " + response.statusCode()));
+                                    });
+                        })
                 .bodyToMono(Map.class)
-                .timeout(Duration.ofSeconds(30))
+                .timeout(Duration.ofSeconds(10))
                 .cast(Map.class)
                 .map(m -> (Map<String, Object>) m)
+                .doOnError(error -> {
+                    System.err.println("FastAPI 포트폴리오 분석 예외: " + error.getMessage());
+                    error.printStackTrace();
+                })
                 .onErrorReturn(java.util.Map.of("analysis", "포트폴리오 분석 중 오류가 발생했습니다."));
     }
 }

@@ -1,3 +1,6 @@
+/**
+ * 사용자의 포트폴리오 정보 저장. 사용자와 1:N 관계.
+ */
 package com.sxxm.stockknock.portfolio.entity;
 
 import com.sxxm.stockknock.auth.entity.User;

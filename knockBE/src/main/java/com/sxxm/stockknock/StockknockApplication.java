@@ -1,3 +1,6 @@
+/**
+ * Spring Boot 애플리케이션 진입점. 스케줄러 활성화.
+ */
 package com.sxxm.stockknock;
 
 import org.springframework.boot.SpringApplication;

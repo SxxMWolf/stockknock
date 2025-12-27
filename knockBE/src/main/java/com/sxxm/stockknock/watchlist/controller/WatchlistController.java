@@ -1,3 +1,6 @@
+/**
+ * 사용자 관심 종목 관리 API. 조회, 추가, 삭제.
+ */
 package com.sxxm.stockknock.watchlist.controller;
 
 import com.sxxm.stockknock.stock.dto.StockDto;
@@ -39,8 +42,12 @@ public class WatchlistController {
     private com.sxxm.stockknock.stock.service.StockPriceService stockPriceService;
 
     @GetMapping
-    public ResponseEntity<List<StockDto>> getWatchlist(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getWatchlist(@RequestHeader("Authorization") String token) {
         try {
+            if (token == null || token.length() < 7) {
+                System.err.println("Invalid token format: " + token);
+                return ResponseEntity.status(401).build();
+            }
             Long userId = jwtUtil.getUserIdFromToken(token.substring(7));
             List<Watchlist> watchlists = watchlistRepository.findByUserId(userId);
             List<StockDto> stocks = watchlists.stream()
@@ -66,7 +73,7 @@ public class WatchlistController {
         } catch (Exception e) {
             System.err.println("관심 종목 조회 오류: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 
